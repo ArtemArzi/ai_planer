@@ -365,7 +365,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.1. Database Schema + Migrations
+- [x] 1.1. Database Schema + Migrations
 
   **What to do**:
   - Create `src/db/schema.sql` with ALL tables from spec:
@@ -410,7 +410,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.2. TDD: Auth Middleware
+- [x] 1.2. TDD: Auth Middleware
 
   **What to do**:
   - Create `src/__tests__/auth.test.ts`:
@@ -449,7 +449,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.3. TDD: Capture Precedence Logic
+- [x] 1.3. TDD: Capture Precedence Logic
 
   **What to do**:
   - Create `src/__tests__/capture.test.ts`:
@@ -488,7 +488,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.4. Database CRUD Functions
+- [x] 1.4. Database CRUD Functions
 
   **What to do**:
   - Create `src/db/users.ts`:
@@ -525,7 +525,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.5. REST API Endpoints
+- [x] 1.5. REST API Endpoints
 
   **What to do**:
   - Create `src/api/index.ts` - Hono app setup
@@ -573,7 +573,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.6. Rate Limiting
+- [x] 1.6. Rate Limiting
 
   **What to do**:
   - Create `src/api/middleware/rateLimit.ts`:
@@ -597,7 +597,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 1.7. Main Entry Point
+- [x] 1.7. Main Entry Point
 
   **What to do**:
   - Create `src/index.ts`:
