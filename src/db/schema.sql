@@ -45,11 +45,12 @@ CREATE TABLE IF NOT EXISTS tasks (
   
   -- Content
   content TEXT NOT NULL,
+  description TEXT,
   type TEXT CHECK(type IN ('task', 'note')) DEFAULT 'task',
   
   -- Lifecycle
   status TEXT CHECK(status IN ('inbox', 'active', 'backlog', 'done', 'archived', 'deleted')) DEFAULT 'inbox',
-  folder TEXT CHECK(folder IN ('work', 'personal', 'ideas', 'media', 'notes')) DEFAULT 'personal',
+  folder TEXT NOT NULL DEFAULT 'personal',
   
   -- Flags
   is_idea INTEGER DEFAULT 0,
@@ -59,6 +60,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   deadline INTEGER,
   scheduled_date TEXT,
   scheduled_time TEXT,
+  recurrence_rule TEXT CHECK(recurrence_rule IN ('daily', 'weekdays', 'weekly')),
   
   -- Google Calendar Sync
   google_event_id TEXT,
@@ -159,3 +161,20 @@ CREATE TABLE IF NOT EXISTS sunset_notifications (
   last_archived_at INTEGER,
   shown INTEGER DEFAULT 0
 );
+
+-- ===== FOLDERS TABLE =====
+CREATE TABLE IF NOT EXISTS folders (
+  id TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(telegram_id) ON DELETE CASCADE,
+  slug TEXT NOT NULL,
+  display_name TEXT NOT NULL,
+  is_system INTEGER NOT NULL DEFAULT 0,
+  icon TEXT NOT NULL DEFAULT '📁',
+  color TEXT NOT NULL DEFAULT '#3B82F6',
+  position INTEGER NOT NULL DEFAULT 0,
+  created_at INTEGER DEFAULT (unixepoch() * 1000),
+  updated_at INTEGER DEFAULT (unixepoch() * 1000),
+  UNIQUE(user_id, slug)
+);
+
+CREATE INDEX IF NOT EXISTS idx_folders_user ON folders(user_id);

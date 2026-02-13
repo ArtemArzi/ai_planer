@@ -1,5 +1,6 @@
 import { createHmac } from 'crypto';
 import type { Context, Next } from 'hono';
+import { upsertUser } from '../../db/users';
 
 export interface TelegramUser {
   id: number;
@@ -93,6 +94,14 @@ export async function authMiddleware(c: Context, next: Next) {
   c.set('userId', data.user.id);
   c.set('user', data.user);
   c.set('initData', data);
+
+  upsertUser({
+    telegramId: data.user.id,
+    username: data.user.username,
+    firstName: data.user.first_name,
+    lastName: data.user.last_name,
+    languageCode: data.user.language_code
+  });
   
   await next();
 }

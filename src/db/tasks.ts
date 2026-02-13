@@ -1,11 +1,20 @@
 import { db, generateId } from './index';
-import type { TaskDTO, TaskRow, Folder, TaskStatus, TaskType, TaskSource } from '../lib/types';
+import type {
+  TaskDTO,
+  TaskRow,
+  FolderSlug,
+  TaskStatus,
+  TaskType,
+  TaskSource,
+  RecurrenceRule
+} from '../lib/types';
 
 function rowToDTO(row: TaskRow): TaskDTO {
   return {
     id: row.id,
     userId: row.user_id,
     content: row.content,
+    description: row.description ?? null,
     type: row.type,
     status: row.status,
     folder: row.folder,
@@ -14,6 +23,7 @@ function rowToDTO(row: TaskRow): TaskDTO {
     deadline: row.deadline,
     scheduledDate: row.scheduled_date,
     scheduledTime: row.scheduled_time,
+    recurrenceRule: row.recurrence_rule,
     googleEventId: row.google_event_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
@@ -30,12 +40,16 @@ function rowToDTO(row: TaskRow): TaskDTO {
 export function createTask(data: {
   userId: number;
   content: string;
+  description?: string | null;
   type?: TaskType;
   status?: TaskStatus;
-  folder?: Folder;
+  folder?: FolderSlug;
   source?: TaskSource;
   telegramMessageId?: number | null;
   deadline?: number | null;
+  scheduledDate?: string | null;
+  scheduledTime?: string | null;
+  recurrenceRule?: RecurrenceRule | null;
 }): TaskDTO {
   const id = generateId();
   const now = Date.now();
@@ -43,21 +57,25 @@ export function createTask(data: {
   
   db.run(`
     INSERT INTO tasks (
-      id, user_id, content, type, status, folder, is_idea, 
-      source, telegram_message_id, deadline, 
+      id, user_id, content, description, type, status, folder, is_idea, 
+      source, telegram_message_id, deadline, scheduled_date, scheduled_time, recurrence_rule,
       created_at, updated_at, last_interaction_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     id,
     data.userId,
     data.content,
+    data.description ?? null,
     data.type || 'task',
     data.status || 'inbox',
     data.folder || 'personal',
     isIdea,
     data.source || 'bot',
-    data.telegramMessageId || null,
-    data.deadline || null,
+    data.telegramMessageId ?? null,
+    data.deadline ?? null,
+    data.scheduledDate ?? null,
+    data.scheduledTime ?? null,
+    data.recurrenceRule ?? null,
     now,
     now,
     now
@@ -77,9 +95,12 @@ export function getTask(id: string): TaskDTO | null {
 export interface GetTasksFilter {
   userId: number;
   status?: TaskStatus;
-  folder?: Folder;
+  folder?: FolderSlug;
+  forDate?: string;
+  afterDate?: string;
   cursor?: string;
   limit?: number;
+  sortBy?: 'created' | 'scheduled';
 }
 
 export function getTasks(filter: GetTasksFilter): TaskDTO[] {
@@ -95,6 +116,16 @@ export function getTasks(filter: GetTasksFilter): TaskDTO[] {
     conditions.push('folder = ?');
     params.push(filter.folder);
   }
+
+  if (filter.forDate) {
+    conditions.push('(scheduled_date IS NULL OR scheduled_date <= ?)');
+    params.push(filter.forDate);
+  }
+
+  if (filter.afterDate) {
+    conditions.push('scheduled_date > ?');
+    params.push(filter.afterDate);
+  }
   
   if (filter.cursor) {
     conditions.push('id < ?');
@@ -103,11 +134,16 @@ export function getTasks(filter: GetTasksFilter): TaskDTO[] {
   
   const limit = filter.limit || 50;
   params.push(limit);
+
+  const orderBy = filter.sortBy === 'scheduled'
+    ? 'scheduled_date ASC, deadline ASC, created_at ASC, id ASC'
+    : 'created_at DESC, id DESC';
   
   const sql = `
-    SELECT * FROM tasks 
+    SELECT *
+    FROM tasks
     WHERE ${conditions.join(' AND ')}
-    ORDER BY created_at DESC, id DESC
+    ORDER BY ${orderBy}
     LIMIT ?
   `;
   
@@ -119,14 +155,16 @@ export function updateTask(
   id: string,
   updates: Partial<{
     content: string;
+    description: string | null;
     type: TaskType;
     status: TaskStatus;
-    folder: Folder;
+    folder: FolderSlug;
     isIdea: boolean;
     isMixerResurfaced: boolean;
     deadline: number | null;
     scheduledDate: string | null;
     scheduledTime: string | null;
+    recurrenceRule: RecurrenceRule | null;
     googleEventId: string | null;
     lastInteractionAt: number;
     lastSeenAt: number | null;
@@ -141,6 +179,10 @@ export function updateTask(
   if (updates.content !== undefined) {
     fields.push('content = ?');
     values.push(updates.content);
+  }
+  if (updates.description !== undefined) {
+    fields.push('description = ?');
+    values.push(updates.description);
   }
   if (updates.type !== undefined) {
     fields.push('type = ?');
@@ -171,6 +213,10 @@ export function updateTask(
   if (updates.scheduledTime !== undefined) {
     fields.push('scheduled_time = ?');
     values.push(updates.scheduledTime);
+  }
+  if (updates.recurrenceRule !== undefined) {
+    fields.push('recurrence_rule = ?');
+    values.push(updates.recurrenceRule);
   }
   if (updates.googleEventId !== undefined) {
     fields.push('google_event_id = ?');
@@ -208,12 +254,51 @@ export function updateTask(
   return getTask(id);
 }
 
+export function updateTaskWithCas(
+  id: string,
+  updates: Partial<{
+    folder: FolderSlug;
+    lastInteractionAt: number;
+  }>,
+  expectedUpdatedAt: number
+): number {
+  const fields: string[] = [];
+  const values: (string | number | null)[] = [];
+
+  if (updates.folder !== undefined) {
+    fields.push('folder = ?');
+    values.push(updates.folder);
+    fields.push('is_idea = ?');
+    values.push(updates.folder === 'ideas' ? 1 : 0);
+  }
+  if (updates.lastInteractionAt !== undefined) {
+    fields.push('last_interaction_at = ?');
+    values.push(updates.lastInteractionAt);
+  }
+
+  if (fields.length === 0) return 0;
+
+  fields.push('updated_at = ?');
+  values.push(Date.now());
+  
+  values.push(id);
+  values.push(expectedUpdatedAt);
+
+  const result = db.run(
+    `UPDATE tasks SET ${fields.join(', ')} WHERE id = ? AND updated_at = ?`,
+    values
+  );
+
+  return result.changes;
+}
+
 export function findTaskByTelegramMessageId(
   userId: number,
   telegramMessageId: number
 ): TaskDTO | null {
   const row = db.query<TaskRow, [number, number]>(`
-    SELECT * FROM tasks 
+    SELECT *
+    FROM tasks
     WHERE user_id = ? AND telegram_message_id = ?
   `).get(userId, telegramMessageId);
   

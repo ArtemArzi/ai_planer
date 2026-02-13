@@ -125,6 +125,13 @@ export function updateMedia(
   return getMedia(id);
 }
 
+export function deleteMedia(id: string): MediaDTO | null {
+  const media = getMedia(id);
+  if (!media) return null;
+  db.run('DELETE FROM media WHERE id = ?', [id]);
+  return media;
+}
+
 export function deleteMediaForTask(taskId: string): number {
   const result = db.run('DELETE FROM media WHERE task_id = ?', [taskId]);
   return result.changes;

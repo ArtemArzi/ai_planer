@@ -2,8 +2,8 @@ import { Hono } from 'hono';
 import { authMiddleware } from '../middleware/auth';
 import { getUser, updateUser, deleteUser } from '../../db/users';
 import { getTasks } from '../../db/tasks';
-import { getMediaForTask } from '../../db/media';
 import { rmSync } from 'fs';
+import { join, resolve } from 'path';
 
 const users = new Hono();
 
@@ -11,7 +11,7 @@ const users = new Hono();
 users.use('*', authMiddleware);
 
 // GET /me - Get current user profile
-users.get('/me', async (c) => {
+users.get('/', async (c) => {
   const userId = c.get('userId');
   const user = getUser(userId);
   
@@ -24,7 +24,7 @@ users.get('/me', async (c) => {
 });
 
 // PATCH /me/settings - Update user settings
-users.patch('/me/settings', async (c) => {
+users.patch('/settings', async (c) => {
   const userId = c.get('userId');
   const body = await c.req.json();
   
@@ -50,12 +50,13 @@ users.patch('/me/settings', async (c) => {
 });
 
 // DELETE /me - Delete account (GDPR)
-users.delete('/me', async (c) => {
+users.delete('/', async (c) => {
   const userId = c.get('userId');
   
   // Delete user files
   try {
-    rmSync(`./uploads/${userId}`, { recursive: true, force: true });
+    const uploadsPath = resolve(process.cwd(), 'uploads', String(userId));
+    rmSync(uploadsPath, { recursive: true, force: true });
   } catch {}
   
   // Delete from DB (CASCADE handles tasks, media)
@@ -78,7 +79,7 @@ users.get('/export', async (c) => {
   }
   
   // Get all tasks (no status filter)
-  const tasks = getTasks({ userId });
+  const tasks = getTasks({ userId, limit: 100000 });
   
   const exportData = {
     exportedAt: new Date().toISOString(),
