@@ -4,6 +4,7 @@ node_modules
 # output
 out
 dist
+frontend/dist-test/
 *.tgz
 
 # code coverage
@@ -17,15 +18,28 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 
 # dotenv environment variable files
 .env
+.env.prod
 .env.development.local
 .env.test.local
 .env.production.local
 .env.local
 
+# deployment runtime state
+ops/deploy/.release-state
+
 # caches
 .eslintcache
 .cache
 *.tsbuildinfo
+
+# Database
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# User Uploads
+uploads/
 
 # IntelliJ based IDEs
 .idea

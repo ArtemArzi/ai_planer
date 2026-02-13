@@ -1,0 +1,32 @@
+# VCS
+.git
+.gitignore
+
+# Dependencies
+node_modules
+frontend/node_modules
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.prod.example
+
+# Runtime state and local assets
+data
+uploads
+frontend/dist-test
+
+# Tooling and workspace artifacts
+.sisyphus
+skrin
+.idea
+.vscode
+.DS_Store
+.cache
+.eslintcache
+*.tsbuildinfo
+
+# Logs and reports
+*.log
+coverage

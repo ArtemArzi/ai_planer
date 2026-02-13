@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "croner": "^10.0.1",
+    "googleapis": "^171.4.0",
     "grammy": "^1.39.3",
     "hono": "^4.11.7",
     "openai": "^6.18.0"

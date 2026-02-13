@@ -1,0 +1,33 @@
+{
+  email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+  encode zstd gzip
+
+  root * /srv
+
+  @api path /health /me* /tasks* /folders* /files* /media* /google* /webhook/*
+  handle @api {
+    reverse_proxy app:3000
+  }
+
+  handle {
+    try_files {path} /index.html
+    file_server
+  }
+
+  header {
+    X-Content-Type-Options nosniff
+    X-Frame-Options SAMEORIGIN
+    Referrer-Policy strict-origin-when-cross-origin
+  }
+}
+
+http://localhost {
+  handle /health {
+    reverse_proxy app:3000
+  }
+
+  respond 200
+}
