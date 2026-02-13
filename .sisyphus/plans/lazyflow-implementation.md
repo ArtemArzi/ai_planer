@@ -633,7 +633,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.1. Bot Setup
+- [x] 2.1. Bot Setup
 
   **What to do**:
   - Create `src/bot/index.ts`:
@@ -667,7 +667,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.2. /start and /help Commands
+- [x] 2.2. /start and /help Commands
 
   **What to do**:
   - Create `src/bot/handlers/commands.ts`:
@@ -694,7 +694,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.3. Message Capture Handler
+- [x] 2.3. Message Capture Handler
 
   **What to do**:
   - Create `src/bot/handlers/message.ts`:
@@ -730,7 +730,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.4. AI Classification
+- [x] 2.4. AI Classification
 
   **What to do**:
   - Create `src/lib/ai/classifier.ts`:
@@ -762,7 +762,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.5. Media Handling
+- [x] 2.5. Media Handling
 
   **What to do**:
   - Create `src/bot/handlers/media.ts`:
@@ -794,7 +794,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.6. Message Edit Sync
+- [x] 2.6. Message Edit Sync
 
   **What to do**:
   - Create handler for `edited_message` event:
@@ -817,7 +817,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.7. Keyboard Button Handlers
+- [x] 2.7. Keyboard Button Handlers
 
   **What to do**:
   - Create `src/bot/handlers/keyboard.ts`:
@@ -843,7 +843,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 2.8. Bot Integration with Hono
+- [x] 2.8. Bot Integration with Hono
 
   **What to do**:
   - Update `src/index.ts`:
@@ -875,7 +875,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.1. Frontend Scaffold
+- [x] 3.1. Frontend Scaffold
 
   **What to do**:
   - Initialize in `frontend/`:
@@ -915,7 +915,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.2. Telegram SDK Integration
+- [x] 3.2. Telegram SDK Integration
 
   **What to do**:
   - Create `frontend/src/providers/TelegramProvider.tsx`:
@@ -947,7 +947,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.3. API Client + Query Setup
+- [x] 3.3. API Client + Query Setup
 
   **What to do**:
   - Create `frontend/src/api/client.ts`:
@@ -978,7 +978,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.4. UI Store (Zustand)
+- [x] 3.4. UI Store (Zustand)
 
   **What to do**:
   - Create `frontend/src/stores/uiStore.ts`:
@@ -1004,7 +1004,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.5. SwipeCard Component
+- [x] 3.5. SwipeCard Component
 
   **What to do**:
   - Create `frontend/src/components/SwipeCard.tsx`:
@@ -1035,7 +1035,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.6. CardStack + InboxStack
+- [x] 3.6. CardStack + InboxStack
 
   **What to do**:
   - Create `frontend/src/components/CardStack.tsx`:
@@ -1068,7 +1068,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.7. TaskRow + TodayList
+- [x] 3.7. TaskRow + TodayList
 
   **What to do**:
   - Create `frontend/src/components/TaskRow.tsx`:
@@ -1102,7 +1102,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.8. TabBar + FAB + Snackbar
+- [x] 3.8. TabBar + FAB + Snackbar
 
   **What to do**:
   - Create `frontend/src/components/TabBar.tsx`:
@@ -1133,7 +1133,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 3.9. Focus Tab Assembly
+- [x] 3.9. Focus Tab Assembly
 
   **What to do**:
   - Create `frontend/src/screens/FocusTab.tsx`:
@@ -1164,7 +1164,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.1. Shelves Tab
+- [x] 4.1. Shelves Tab
 
   **What to do**:
   - Create `frontend/src/screens/ShelvesTab.tsx`:
@@ -1196,7 +1196,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.2. TaskDetailSheet
+- [x] 4.2. TaskDetailSheet
 
   **What to do**:
   - Create `frontend/src/components/sheets/TaskDetailSheet.tsx`:
@@ -1222,7 +1222,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.3. CalendarSheet (Smart Grid)
+- [x] 4.3. CalendarSheet (Smart Grid)
 
   **What to do**:
   - Create `frontend/src/components/sheets/CalendarSheet.tsx`:
@@ -1246,7 +1246,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.4. AddTaskSheet
+- [x] 4.4. AddTaskSheet
 
   **What to do**:
   - Create `frontend/src/components/sheets/AddTaskSheet.tsx`:
@@ -1271,7 +1271,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.5. SettingsSheet
+- [x] 4.5. SettingsSheet
 
   **What to do**:
   - Create `frontend/src/components/sheets/SettingsSheet.tsx`:
@@ -1298,7 +1298,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.6. NoteCard + Notes Folder
+- [x] 4.6. NoteCard + Notes Folder
 
   **What to do**:
   - Create `frontend/src/components/NoteCard.tsx`:
@@ -1325,7 +1325,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.7. CompletedTasksView
+- [x] 4.7. CompletedTasksView
 
   **What to do**:
   - Create `frontend/src/components/CompletedTasksView.tsx`:
@@ -1348,7 +1348,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.8. DeadlineIndicator + FolderBadge
+- [x] 4.8. DeadlineIndicator + FolderBadge
 
   **What to do**:
   - Create `frontend/src/components/DeadlineIndicator.tsx`:
@@ -1372,7 +1372,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 4.9. Polish and Empty States
+- [x] 4.9. Polish and Empty States
 
   **What to do**:
   - Add loading skeletons to all lists
@@ -1402,7 +1402,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.1. TDD: Sunset Engine
+- [x] 5.1. TDD: Sunset Engine
 
   **What to do**:
   - Create `src/__tests__/sunset.test.ts`:
@@ -1436,7 +1436,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.2. TDD: Mixer Engine
+- [x] 5.2. TDD: Mixer Engine
 
   **What to do**:
   - Create `src/__tests__/mixer.test.ts`:
@@ -1469,7 +1469,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.3. Media Queue Processor
+- [x] 5.3. Media Queue Processor
 
   **What to do**:
   - Create `src/jobs/mediaQueue.ts`:
@@ -1499,7 +1499,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.4. Notification Jobs
+- [x] 5.4. Notification Jobs
 
   **What to do**:
   - Create `src/jobs/notifications.ts`:
@@ -1525,7 +1525,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.5. Cleanup Jobs
+- [x] 5.5. Cleanup Jobs
 
   **What to do**:
   - Create `src/jobs/cleanup.ts`:
@@ -1550,7 +1550,7 @@ Stage 6: Integrations (Calendar, Stories) [OPTIONAL]
 
 ---
 
-- [ ] 5.6. Cron Registration
+- [x] 5.6. Cron Registration
 
   **What to do**:
   - Create `src/jobs/index.ts`:
