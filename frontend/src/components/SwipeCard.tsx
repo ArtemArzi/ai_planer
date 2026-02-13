@@ -6,6 +6,8 @@ import { ConfirmSheet } from "./ConfirmSheet";
 import { DeadlineIndicator } from "./DeadlineIndicator";
 import { FolderBadge } from "./FolderBadge";
 
+import { useUIStore } from "../stores/uiStore";
+
 type SwipeDirection = "left" | "right" | "up" | "down";
 
 type SwipeCardProps = {
@@ -57,6 +59,7 @@ export function SwipeCard({ task, onSwipeComplete, isTop }: SwipeCardProps) {
   const downOverlay = useTransform(y, [0, SWIPE_DOWN_THRESHOLD], [0, 1]);
 
   const haptic = useHaptic();
+  const setIsDraggingTask = useUIStore((state) => state.setIsDraggingTask);
   const [swipeLocked, setSwipeLocked] = useState<"horizontal" | "vertical" | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
@@ -138,7 +141,11 @@ export function SwipeCard({ task, onSwipeComplete, isTop }: SwipeCardProps) {
         dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
         dragElastic={0.8}
         onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
+        onDragStart={() => setIsDraggingTask(true)}
+        onDragEnd={(e, info) => {
+          setIsDraggingTask(false);
+          handleDragEnd(e, info);
+        }}
         whileDrag={{ cursor: "grabbing" }}
       >
         <motion.div 

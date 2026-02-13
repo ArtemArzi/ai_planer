@@ -85,6 +85,9 @@ export function App() {
 
   useEffect(() => {
     markTabSwitchRendered(activeTab);
+    if (activeTab === "shelves") {
+      window.scrollTo(0, 0);
+    }
   }, [activeTab]);
 
   const selectedTask = selectedTaskId ? allTasks.find((task) => task.id === selectedTaskId) ?? null : null;
@@ -120,12 +123,13 @@ export function App() {
   return (
     <main data-vaul-drawer-wrapper="" className="min-h-screen overflow-x-hidden bg-tg-bg text-tg-text">
       <motion.div
+        className="relative"
         drag={openSheet ? false : "x"}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0.3, right: 0.3 }}
         onDragEnd={handleTabSwipe}
       >
-        <AnimatePresence mode="sync" custom={direction} initial={false}>
+        <AnimatePresence mode="popLayout" custom={direction} initial={false}>
           {activeTab === "focus" ? (
             <motion.div
               key="focus"
@@ -135,6 +139,7 @@ export function App() {
               animate="center"
               exit="exit"
               transition={tabTransition}
+              className="gpu-accelerated"
             >
               <FocusTab />
             </motion.div>
@@ -147,6 +152,7 @@ export function App() {
               animate="center"
               exit="exit"
               transition={tabTransition}
+              className="gpu-accelerated"
             >
               <Suspense fallback={<section className="mx-auto w-full max-w-lg px-5 pb-36 pt-6" />}>
                 <ShelvesTab />
