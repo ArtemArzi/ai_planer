@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import type { Task } from "../api/tasks";
+import { startTabSwitchMeasurement, type TabSwitchSource } from "../lib/perf";
 
 type UndoType = "complete" | "delete" | "move";
 type SwipeDirection = "left" | "right" | "up" | "down";
@@ -15,7 +16,7 @@ export type UndoAction = {
 
 type UIStore = {
   activeTab: "focus" | "shelves";
-  setActiveTab: (tab: "focus" | "shelves") => void;
+  setActiveTab: (tab: "focus" | "shelves", source?: TabSwitchSource) => void;
 
   pendingUndos: Map<string, UndoAction>;
   latestUndoTaskId: string | null;
@@ -47,7 +48,14 @@ type UIStore = {
 
 export const useUIStore = create<UIStore>((set, get) => ({
   activeTab: "focus",
-  setActiveTab: (tab) => set({ activeTab: tab }),
+  setActiveTab: (tab, source = "programmatic") =>
+    set((state) => {
+      if (state.activeTab !== tab) {
+        startTabSwitchMeasurement(state.activeTab, tab, source);
+      }
+
+      return { activeTab: tab };
+    }),
 
   pendingUndos: new Map(),
   latestUndoTaskId: null,

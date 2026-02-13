@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { authMiddleware } from '../middleware/auth';
 import { 
-  createTask, getTask, getTasks, updateTask, 
-  countTasks 
+  createTask, getTask, getTasks, updateTask,
+  countTasksByStatus, searchTasks
 } from '../../db/tasks';
 import { getUser } from '../../db/users';
 import { folderExists } from '../../db/folders';
@@ -82,14 +82,8 @@ tasks.get('/upcoming', async (c) => {
 
 tasks.get('/stats', async (c) => {
   const userId = c.get('userId');
-  
-  return c.json({
-    inbox: countTasks(userId, 'inbox'),
-    active: countTasks(userId, 'active'),
-    backlog: countTasks(userId, 'backlog'),
-    done: countTasks(userId, 'done'),
-    total: countTasks(userId)
-  });
+
+  return c.json(countTasksByStatus(userId));
 });
 
 tasks.get('/search', async (c) => {
@@ -100,13 +94,7 @@ tasks.get('/search', async (c) => {
     return c.json([]);
   }
   
-  const allTasks = getTasks({ userId, limit: 1000 });
-  const filtered = allTasks.filter(t => 
-    t.status !== 'deleted' && 
-    t.content.toLowerCase().includes(query.toLowerCase())
-  ).slice(0, 50);
-  
-  return c.json(filtered);
+  return c.json(searchTasks(userId, query, 50));
 });
 
 tasks.post('/', async (c) => {
@@ -211,9 +199,7 @@ tasks.patch('/:id', async (c) => {
     delete updates.expectedUpdatedAt;
   }
   
-  if (updates.deadline && updates.deadline < Date.now()) {
-    return c.json({ error: 'Deadline cannot be in the past', code: 'VALIDATION_ERROR' }, 400);
-  }
+
 
   if (updates.folder !== undefined && !folderExists(userId, updates.folder)) {
     return c.json({ error: `Folder "${updates.folder}" does not exist`, code: 'INVALID_FOLDER' }, 400);

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import type { Task } from "../api/tasks";
 
 type NoteCardProps = {
@@ -17,14 +17,15 @@ function splitTitleBody(content: string): { title: string; body: string } {
   };
 }
 
-export function NoteCard({ task, onTap }: NoteCardProps) {
+function NoteCardComponent({ task, onTap }: NoteCardProps) {
   const { title, body } = useMemo(() => splitTitleBody(task.content), [task.content]);
+  const handleTap = useCallback(() => onTap?.(task.id), [onTap, task.id]);
 
   return (
     <button
       type="button"
       className="w-full rounded-2xl bg-tg-secondary-bg p-4 text-left transition-colors active:bg-tg-secondary-bg/80"
-      onClick={() => onTap?.(task.id)}
+      onClick={handleTap}
     >
       <p className="text-sm font-semibold text-tg-text line-clamp-1">{title}</p>
       {body && (
@@ -33,3 +34,5 @@ export function NoteCard({ task, onTap }: NoteCardProps) {
     </button>
   );
 }
+
+export const NoteCard = memo(NoteCardComponent);

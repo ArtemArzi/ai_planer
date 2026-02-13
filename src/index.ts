@@ -24,7 +24,14 @@ console.log(`   Port: ${env.PORT}`);
 console.log(`   Database: ${env.DB_PATH}`);
 
 registerBackgroundJobs();
-setupMenuButton();
+
+bot.init().then(() => {
+  console.log(`   Bot: @${bot.botInfo.username} initialized`);
+  setupMenuButton();
+}).catch((error) => {
+  console.error('[Bot] Failed to initialize:', error);
+  setupMenuButton();
+});
 
 if (env.isDev) {
   void bot.api.deleteWebhook({ drop_pending_updates: false }).catch((error) => {

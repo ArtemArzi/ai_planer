@@ -8,11 +8,19 @@ import {
   GoogleCalendarConfigError,
   isGoogleCalendarConfigured,
 } from '../../lib/google';
+import { bot } from '../../bot';
 import { env } from '../../env';
 
 const googleRoutes = new Hono();
 
 function buildMiniAppRedirect(status: 'connected' | 'error', reason?: string): string {
+  const botUsername = bot.botInfo?.username;
+  if (botUsername) {
+    const startParam = reason ? `google_${status}_${reason}` : `google_${status}`;
+    return `https://t.me/${botUsername}?startapp=${startParam}`;
+  }
+
+  // Fallback: bot not initialized yet
   const redirect = new URL(env.MINI_APP_URL);
   redirect.searchParams.set('googleCalendar', status);
   if (reason) {

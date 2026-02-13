@@ -1,18 +1,25 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { FloatingActionButton } from "./components/FloatingActionButton";
 import { Snackbar } from "./components/Snackbar";
 import { TabBar } from "./components/TabBar";
 import { TimezoneSync } from "./components/TimezoneSync";
 import { AddTaskSheet } from "./components/sheets/AddTaskSheet";
-import { CalendarSheet } from "./components/sheets/CalendarSheet";
-import { SettingsSheet } from "./components/sheets/SettingsSheet";
-import { TaskDetailSheet } from "./components/sheets/TaskDetailSheet";
 import { useTasks, useUpdateTask } from "./api/tasks";
 import { useGoogleCalendarCallbackSync } from "./api/google";
+import { markColdStartFirstInteractivePaint, markTabSwitchRendered } from "./lib/perf";
 import { FocusTab } from "./screens/FocusTab";
-import { ShelvesTab } from "./screens/ShelvesTab";
 import { useUIStore } from "./stores/uiStore";
+
+const ShelvesTab = lazy(() => import("./screens/ShelvesTab").then((module) => ({ default: module.ShelvesTab })));
+const TaskDetailSheet = lazy(() => import("./components/sheets/TaskDetailSheet").then((module) => ({ default: module.TaskDetailSheet })));
+const CalendarSheet = lazy(() => import("./components/sheets/CalendarSheet").then((module) => ({ default: module.CalendarSheet })));
+const SettingsSheet = lazy(() => import("./components/sheets/SettingsSheet").then((module) => ({ default: module.SettingsSheet })));
+
+const idle =
+  typeof window !== "undefined" && "requestIdleCallback" in window
+    ? window.requestIdleCallback.bind(window)
+    : (callback: () => void) => window.setTimeout(callback, 120);
 
 const TAB_SWIPE_THRESHOLD = 30;
 
@@ -47,7 +54,8 @@ export function App() {
   const openSheet = useUIStore((state) => state.openSheet);
   const selectedTaskId = useUIStore((state) => state.selectedTaskId);
   const closeSheet = useUIStore((state) => state.closeSheet);
-  const { data: allTasks = [] } = useTasks();
+  const shouldLoadDetailTasks = openSheet === "taskDetail" && Boolean(selectedTaskId);
+  const { data: allTasks = [] } = useTasks({}, { enabled: shouldLoadDetailTasks });
   const updateTask = useUpdateTask();
 
   const [direction, setDirection] = useState(0);
@@ -61,6 +69,23 @@ export function App() {
       window.removeEventListener("pointercancel", resetDragging);
     };
   }, [setIsDraggingTask]);
+
+  useEffect(() => {
+    markColdStartFirstInteractivePaint();
+  }, []);
+
+  useEffect(() => {
+    idle(() => {
+      void import("./screens/ShelvesTab");
+      void import("./components/sheets/TaskDetailSheet");
+      void import("./components/sheets/CalendarSheet");
+      void import("./components/sheets/SettingsSheet");
+    });
+  }, []);
+
+  useEffect(() => {
+    markTabSwitchRendered(activeTab);
+  }, [activeTab]);
 
   const selectedTask = selectedTaskId ? allTasks.find((task) => task.id === selectedTaskId) ?? null : null;
 
@@ -77,7 +102,7 @@ export function App() {
   const switchTab = (tab: "focus" | "shelves") => {
     if (tab === activeTab) return;
     setDirection(tab === "shelves" ? 1 : -1);
-    setActiveTab(tab);
+    setActiveTab(tab, "swipe");
   };
 
   const handleTabSwipe = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -100,7 +125,7 @@ export function App() {
         dragElastic={{ left: 0.3, right: 0.3 }}
         onDragEnd={handleTabSwipe}
       >
-        <AnimatePresence mode="wait" custom={direction} initial={false}>
+        <AnimatePresence mode="sync" custom={direction} initial={false}>
           {activeTab === "focus" ? (
             <motion.div
               key="focus"
@@ -123,7 +148,9 @@ export function App() {
               exit="exit"
               transition={tabTransition}
             >
-              <ShelvesTab />
+              <Suspense fallback={<section className="mx-auto w-full max-w-lg px-5 pb-36 pt-6" />}>
+                <ShelvesTab />
+              </Suspense>
             </motion.div>
           )}
         </AnimatePresence>
@@ -134,19 +161,21 @@ export function App() {
       <TabBar />
       <TimezoneSync />
       <AddTaskSheet open={openSheet === "addTask"} onOpenChange={(open) => !open && closeSheet()} />
-      <SettingsSheet open={openSheet === "settings"} onOpenChange={(open) => !open && closeSheet()} />
-      <TaskDetailSheet
-        task={selectedTask}
-        open={openSheet === "taskDetail"}
-        onOpenChange={(open) => !open && closeSheet()}
-        onComplete={handleCompleteTask}
-        onDelete={handleDeleteTask}
-      />
-      <CalendarSheet
-        taskId={selectedTaskId}
-        open={openSheet === "calendar"}
-        onOpenChange={(open) => !open && closeSheet()}
-      />
+      <Suspense fallback={null}>
+        <SettingsSheet open={openSheet === "settings"} onOpenChange={(open) => !open && closeSheet()} />
+        <TaskDetailSheet
+          task={selectedTask}
+          open={openSheet === "taskDetail"}
+          onOpenChange={(open) => !open && closeSheet()}
+          onComplete={handleCompleteTask}
+          onDelete={handleDeleteTask}
+        />
+        <CalendarSheet
+          taskId={selectedTaskId}
+          open={openSheet === "calendar"}
+          onOpenChange={(open) => !open && closeSheet()}
+        />
+      </Suspense>
     </main>
   );
 }

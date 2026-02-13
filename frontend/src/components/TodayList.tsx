@@ -31,7 +31,30 @@ export function TodayList() {
   const [orderedTasks, setOrderedTasks] = useState<Task[]>([]);
 
   useEffect(() => {
-    setOrderedTasks(tasks);
+    setOrderedTasks((previous) => {
+      if (!previous.length && tasks.length === 0) {
+        return previous;
+      }
+
+      if (
+        previous.length === tasks.length
+        && previous.every((task, index) => task.id === tasks[index]?.id)
+      ) {
+        return previous;
+      }
+
+      if (!previous.length) {
+        return tasks;
+      }
+
+      const byId = new Map(tasks.map((task) => [task.id, task]));
+      const kept = previous
+        .map((task) => byId.get(task.id))
+        .filter((task): task is Task => task !== undefined);
+      const added = tasks.filter((task) => !kept.some((current) => current.id === task.id));
+
+      return [...kept, ...added];
+    });
   }, [tasks]);
 
   if (isLoading) {

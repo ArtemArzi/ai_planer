@@ -39,6 +39,10 @@ type TasksFilter = {
   cursor?: string;
 };
 
+type TasksQueryOptions = {
+  enabled?: boolean;
+};
+
 type TaskUpdatePayload = Partial<Omit<Task, "id" | "userId" | "createdAt">> & {
   expectedUpdatedAt?: number;
 };
@@ -130,11 +134,12 @@ async function postTaskGoogleCalendarAction(payload: {
   return apiClient.post<Task>(`/tasks/${payload.id}/google-calendar`, { action: payload.action });
 }
 
-export function useTasks(filter: TasksFilter = {}) {
+export function useTasks(filter: TasksFilter = {}, options: TasksQueryOptions = {}) {
   return useQuery({
     queryKey: ["tasks", filter],
     queryFn: () => fetchTasks(filter),
     staleTime: 30 * 1000,
+    enabled: options.enabled ?? true,
   });
 }
 

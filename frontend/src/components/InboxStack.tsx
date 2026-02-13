@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInboxTasks, useUpdateTask } from "../api/tasks";
 import { useHaptic } from "../hooks/useHaptic";
@@ -13,7 +13,9 @@ export function InboxStack() {
   const { data: rawTasks = [], isLoading } = useInboxTasks();
   const tasks = useMemo(() => rawTasks.filter((t) => t.folder !== "notes" && t.folder !== "ideas"), [rawTasks]);
   const updateTask = useUpdateTask();
-  const { addPendingUndo, removePendingUndo, openCalendarSheet } = useUIStore();
+  const addPendingUndo = useUIStore((state) => state.addPendingUndo);
+  const removePendingUndo = useUIStore((state) => state.removePendingUndo);
+  const openCalendarSheet = useUIStore((state) => state.openCalendarSheet);
   const haptic = useHaptic();
 
   const [showHint, setShowHint] = useState(() => {
@@ -26,7 +28,7 @@ export function InboxStack() {
   const hasCards = tasks.length > 0;
   const isOverflowing = tasks.length > 10;
 
-  const handleSwipe = (taskId: string, direction: SwipeDirection) => {
+  const handleSwipe = useCallback((taskId: string, direction: SwipeDirection) => {
     const task = tasks.find((item) => item.id === taskId);
     if (!task) {
       return;
@@ -62,9 +64,9 @@ export function InboxStack() {
         openCalendarSheet(taskId);
         break;
     }
-  };
+  }, [addPendingUndo, openCalendarSheet, removePendingUndo, tasks, updateTask]);
 
-  const handlePostponeAll = async () => {
+  const handlePostponeAll = useCallback(async () => {
     if (!tasks.length) {
       return;
     }
@@ -79,7 +81,7 @@ export function InboxStack() {
         }),
       ),
     );
-  };
+  }, [haptic, tasks, updateTask]);
 
   return (
     <AnimatePresence>

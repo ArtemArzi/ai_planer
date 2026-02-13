@@ -23,8 +23,10 @@ bunx tailwindcss -i ./src/index.css -o ./dist/output.css --minify
 bun build ./src/main.tsx \
   --outdir ./dist/assets \
   --target browser \
+  --splitting \
   --minify \
-  --entry-naming '[name]-[hash].js'
+  --entry-naming '[name]-[hash].js' \
+  --chunk-naming 'chunks/[name]-[hash].js'
 
 cp ./index.html ./dist/index.html
 

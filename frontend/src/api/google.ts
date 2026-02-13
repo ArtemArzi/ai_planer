@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { retrieveLaunchParams } from "@telegram-apps/sdk-react";
 import { apiClient } from "./client";
 
 type GoogleConnectUrlResponse = {
@@ -30,27 +31,33 @@ export function useDisconnectGoogleCalendar() {
   });
 }
 
+function getGoogleCallbackStatus(): string | null {
+  try {
+    const { startParam } = retrieveLaunchParams();
+    if (startParam?.startsWith("google_connected")) return "connected";
+    if (startParam?.startsWith("google_error")) return "error";
+  } catch {}
+
+  if (typeof window === "undefined") return null;
+  return new URL(window.location.href).searchParams.get("googleCalendar");
+}
+
 export function useGoogleCalendarCallbackSync() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
-    const currentUrl = new URL(window.location.href);
-    const callbackStatus = currentUrl.searchParams.get("googleCalendar");
-    if (!callbackStatus) {
-      return;
-    }
+    const status = getGoogleCallbackStatus();
+    if (!status) return;
 
     queryClient.invalidateQueries({ queryKey: ["me"] });
 
-    currentUrl.searchParams.delete("googleCalendar");
-    currentUrl.searchParams.delete("reason");
-
-    const search = currentUrl.searchParams.toString();
-    const nextRelativeUrl = `${currentUrl.pathname}${search ? `?${search}` : ""}${currentUrl.hash}`;
-    window.history.replaceState({}, "", nextRelativeUrl);
+    if (typeof window !== "undefined") {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.delete("googleCalendar");
+      currentUrl.searchParams.delete("reason");
+      const search = currentUrl.searchParams.toString();
+      const nextRelativeUrl = `${currentUrl.pathname}${search ? `?${search}` : ""}${currentUrl.hash}`;
+      window.history.replaceState({}, "", nextRelativeUrl);
+    }
   }, [queryClient]);
 }

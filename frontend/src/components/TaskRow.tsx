@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { memo, useCallback, type PointerEvent } from "react";
 import { motion, useDragControls } from "framer-motion";
 import type { Task } from "../api/tasks";
 import { useUpdateTask } from "../api/tasks";
@@ -10,43 +10,38 @@ import { useUIStore } from "../stores/uiStore";
 type TaskRowProps = {
   task: Task;
   dragControls?: ReturnType<typeof useDragControls>;
+  enableLayoutAnimation?: boolean;
 };
 
-export function TaskRow({ task, dragControls }: TaskRowProps) {
-  const [isCompleting, setIsCompleting] = useState(false);
+function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: TaskRowProps) {
   const updateTask = useUpdateTask();
   const pendingUndos = useUIStore((state) => state.pendingUndos);
   const addPendingUndo = useUIStore((state) => state.addPendingUndo);
   const removePendingUndo = useUIStore((state) => state.removePendingUndo);
   const openTaskDetail = useUIStore((state) => state.openTaskDetail);
+  const setIsDraggingTask = useUIStore((state) => state.setIsDraggingTask);
   const haptic = useHaptic();
+  const isCompleting = pendingUndos.has(task.id);
 
-  useEffect(() => {
-    setIsCompleting(pendingUndos.has(task.id));
-  }, [pendingUndos, task.id]);
-
-  const showCelebration = () => {
+  const showCelebration = useCallback(() => {
     const element = document.getElementById(`task-${task.id}`);
     if (!element) return;
     element.classList.add("celebrate");
     setTimeout(() => element.classList.remove("celebrate"), 600);
-  };
+  }, [task.id]);
 
-  const handleComplete = () => {
+  const handleComplete = useCallback(() => {
     if (isCompleting) {
       removePendingUndo(task.id);
-      setIsCompleting(false);
       return;
     }
 
-    setIsCompleting(true);
     haptic.notification("success");
     showCelebration();
 
     const timerId = setTimeout(() => {
       updateTask.mutate({ id: task.id, updates: { status: "done" } });
       removePendingUndo(task.id);
-      setIsCompleting(false);
     }, 2000);
 
     addPendingUndo(
@@ -58,16 +53,34 @@ export function TaskRow({ task, dragControls }: TaskRowProps) {
       },
       timerId as unknown as ReturnType<typeof globalThis.setTimeout>,
     );
-  };
+  }, [
+    addPendingUndo,
+    haptic,
+    isCompleting,
+    removePendingUndo,
+    showCelebration,
+    task.id,
+    task.status,
+    updateTask,
+  ]);
 
-  const handleTap = () => {
+  const handleTap = useCallback(() => {
     if (!isCompleting) openTaskDetail(task.id);
-  };
+  }, [isCompleting, openTaskDetail, task.id]);
+
+  const handlePointerDown = useCallback((e: PointerEvent<HTMLSpanElement>) => {
+    setIsDraggingTask(true);
+    dragControls?.start(e);
+  }, [dragControls, setIsDraggingTask]);
+
+  const handlePointerUp = useCallback(() => {
+    setIsDraggingTask(false);
+  }, [setIsDraggingTask]);
 
   return (
     <motion.div
-      layout
-      transition={{ layout: { type: "spring", stiffness: 400, damping: 30 } }}
+      layout={enableLayoutAnimation}
+      transition={enableLayoutAnimation ? { layout: { type: "spring", stiffness: 320, damping: 34 } } : undefined}
       id={`task-${task.id}`}
       className={`flex items-center gap-3 rounded-2xl bg-tg-secondary-bg p-4 ${isCompleting ? "opacity-60" : ""}`}
     >
@@ -97,15 +110,14 @@ export function TaskRow({ task, dragControls }: TaskRowProps) {
 
       <span
         className="material-symbols-outlined cursor-grab touch-none text-lg text-icon-muted active:cursor-grabbing"
-        onPointerDown={(e) => {
-          useUIStore.getState().setIsDraggingTask(true);
-          dragControls?.start(e);
-        }}
-        onPointerUp={() => useUIStore.getState().setIsDraggingTask(false)}
-        onPointerCancel={() => useUIStore.getState().setIsDraggingTask(false)}
+        onPointerDown={handlePointerDown}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
       >
         drag_indicator
       </span>
     </motion.div>
   );
 }
+
+export const TaskRow = memo(TaskRowComponent);

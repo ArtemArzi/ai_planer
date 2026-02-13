@@ -319,6 +319,53 @@ export function countTasks(userId: number, status?: TaskStatus): number {
   return result?.count || 0;
 }
 
+export function countTasksByStatus(userId: number): {
+  inbox: number;
+  active: number;
+  backlog: number;
+  done: number;
+  total: number;
+} {
+  const result = db.query<{
+    inbox: number;
+    active: number;
+    backlog: number;
+    done: number;
+    total: number;
+  }, [number]>(`
+    SELECT
+      SUM(CASE WHEN status = 'inbox' THEN 1 ELSE 0 END) as inbox,
+      SUM(CASE WHEN status = 'active' THEN 1 ELSE 0 END) as active,
+      SUM(CASE WHEN status = 'backlog' THEN 1 ELSE 0 END) as backlog,
+      SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done,
+      COUNT(*) as total
+    FROM tasks
+    WHERE user_id = ?
+  `).get(userId);
+
+  return {
+    inbox: result?.inbox || 0,
+    active: result?.active || 0,
+    backlog: result?.backlog || 0,
+    done: result?.done || 0,
+    total: result?.total || 0,
+  };
+}
+
+export function searchTasks(userId: number, query: string, limit = 50): TaskDTO[] {
+  const rows = db.query<TaskRow, [number, string, number]>(`
+    SELECT *
+    FROM tasks
+    WHERE user_id = ?
+      AND status != 'deleted'
+      AND content LIKE ? COLLATE NOCASE
+    ORDER BY updated_at DESC, id DESC
+    LIMIT ?
+  `).all(userId, `%${query}%`, limit);
+
+  return rows.map(rowToDTO);
+}
+
 export function deleteTask(id: string): boolean {
   const result = db.run('DELETE FROM tasks WHERE id = ?', [id]);
   return result.changes > 0;

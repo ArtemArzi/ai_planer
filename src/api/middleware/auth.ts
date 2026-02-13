@@ -2,6 +2,9 @@ import { createHmac } from 'crypto';
 import type { Context, Next } from 'hono';
 import { upsertUser } from '../../db/users';
 
+const USER_SYNC_TTL_MS = 5 * 60 * 1000;
+const lastUserSyncByTelegramId = new Map<number, number>();
+
 export interface TelegramUser {
   id: number;
   first_name: string;
@@ -95,13 +98,18 @@ export async function authMiddleware(c: Context, next: Next) {
   c.set('user', data.user);
   c.set('initData', data);
 
-  upsertUser({
-    telegramId: data.user.id,
-    username: data.user.username,
-    firstName: data.user.first_name,
-    lastName: data.user.last_name,
-    languageCode: data.user.language_code
-  });
+  const now = Date.now();
+  const lastSyncedAt = lastUserSyncByTelegramId.get(data.user.id) ?? 0;
+  if (now - lastSyncedAt >= USER_SYNC_TTL_MS) {
+    upsertUser({
+      telegramId: data.user.id,
+      username: data.user.username,
+      firstName: data.user.first_name,
+      lastName: data.user.last_name,
+      languageCode: data.user.language_code
+    });
+    lastUserSyncByTelegramId.set(data.user.id, now);
+  }
   
   await next();
 }

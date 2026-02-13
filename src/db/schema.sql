@@ -84,6 +84,8 @@ CREATE TABLE IF NOT EXISTS tasks (
 -- Indexes for common queries
 CREATE INDEX IF NOT EXISTS idx_tasks_user_status ON tasks(user_id, status);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_folder ON tasks(user_id, folder);
+CREATE INDEX IF NOT EXISTS idx_tasks_user_scheduled_date ON tasks(user_id, scheduled_date);
+CREATE INDEX IF NOT EXISTS idx_tasks_user_created_at ON tasks(user_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tasks_deadline ON tasks(deadline) WHERE deadline IS NOT NULL;
 CREATE INDEX IF NOT EXISTS idx_tasks_mixer ON tasks(user_id, status, last_seen_at) WHERE status = 'backlog';
 CREATE INDEX IF NOT EXISTS idx_tasks_sunset ON tasks(status, last_interaction_at) WHERE status = 'active';
