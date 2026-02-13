@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Lazy Flow - Shelves</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#3B82F6", // Blue similar to the button
+                        "background-light": "#F5F5F7",
+                        "background-dark": "#121212",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#1E1E1E",
+                        "text-primary-light": "#111827",
+                        "text-primary-dark": "#F3F4F6",
+                        "text-secondary-light": "#6B7280",
+                        "text-secondary-dark": "#9CA3AF",
+                        "icon-bg-light": "#E5E7EB",
+                        "icon-bg-dark": "#374151",
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        'xl': "16px",
+                        '2xl': "20px",
+                        '3xl': "24px",
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                    }
+                },
+            },
+        };
+    </script>
+<style>.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }.story-ring-gradient {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            padding: 3px;border-radius: 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-primary-light dark:text-text-primary-dark antialiased transition-colors duration-200">
+<div class="max-w-md mx-auto min-h-screen relative pb-24 overflow-hidden">
+<header class="px-5 pt-4 pb-2 flex items-center justify-between">
+<h2 class="text-sm font-semibold tracking-wide text-text-secondary-light dark:text-text-secondary-dark uppercase">Lazy Flow</h2>
+<button class="p-2 -mr-2 text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition">
+<span class="material-icons-round text-xl">close</span>
+</button>
+</header>
+<div class="px-5 py-2 flex items-center justify-between">
+<h1 class="text-3xl font-bold text-text-primary-light dark:text-white">Полки</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-text-secondary-light dark:text-text-secondary-dark transition">
+<span class="material-icons-round text-xl">settings</span>
+</button>
+</div>
+<div class="px-5 mt-4">
+<div class="relative">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-round text-text-secondary-light dark:text-text-secondary-dark">search</span>
+</span>
+<input class="block w-full pl-10 pr-3 py-3 border-none rounded-2xl bg-white dark:bg-card-dark text-text-primary-light dark:text-white placeholder-text-secondary-light dark:placeholder-text-secondary-dark focus:ring-2 focus:ring-primary shadow-sm" placeholder="Поиск по задачам" type="text"/>
+</div>
+</div>
+<section class="mt-6 px-5">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-5 shadow-soft w-full overflow-hidden">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-lg font-bold text-text-primary-light dark:text-white">Истории идей</h3>
+</div>
+<div class="flex overflow-x-auto no-scrollbar space-x-5 pr-4 -mx-1 px-1 pb-1">
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">lightbulb</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Хочу открыть</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-indigo-400 to-purple-600 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">call</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Позвонить</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">emoji_objects</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Идея для...</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">architecture</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Проект</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-red-400 to-pink-600 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">favorite</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Вдохнове...</span>
+</div>
+<div class="flex flex-col items-center flex-shrink-0 w-[72px]">
+<div class="story-ring-gradient w-[72px] h-[72px] flex items-center justify-center">
+<div class="bg-white dark:bg-gray-800 w-full h-full rounded-full p-[2px]">
+<div class="w-full h-full rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+<span class="material-icons-round text-white text-3xl">edit_note</span>
+</div>
+</div>
+</div>
+<span class="text-[11px] font-medium text-center mt-2 leading-tight text-text-primary-light dark:text-text-secondary-dark w-full truncate">Заметки</span>
+</div>
+</div>
+</div>
+</section>
+<div class="mt-8 px-5 flex items-center justify-between">
+<h4 class="text-xs font-bold text-text-secondary-light dark:text-text-secondary-dark uppercase tracking-wider">Папки • 6</h4>
+<button class="px-4 py-2 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center space-x-2 text-sm font-medium text-text-primary-light dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700 transition">
+<span class="material-icons-round text-base text-text-secondary-light dark:text-text-secondary-dark">edit</span>
+<span>Управлять</span>
+</button>
+</div>
+<div class="mt-4 px-5 grid grid-cols-2 gap-4">
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-5 shadow-sm relative h-40 flex flex-col justify-between">
+<div class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 text-xs font-bold px-2 py-1 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">7</div>
+<div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-icons-round">work_outline</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Работа</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1 truncate">Проекты и задачи</p>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-5 shadow-sm relative h-40 flex flex-col justify-between">
+<div class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 text-xs font-bold px-2 py-1 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">14</div>
+<div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400">
+<span class="material-icons-round">person_outline</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Личное</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1 truncate">Здоровье и быт</p>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-5 shadow-sm relative h-40 flex flex-col justify-between">
+<div class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 text-xs font-bold px-2 py-1 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">3</div>
+<div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400">
+<span class="material-icons-round">flight</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Путешествия</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1 truncate">Планы на год</p>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-3xl p-5 shadow-sm relative h-40 flex flex-col justify-between">
+<div class="absolute top-4 right-4 bg-gray-100 dark:bg-gray-700 text-xs font-bold px-2 py-1 rounded-lg text-text-secondary-light dark:text-text-secondary-dark">1</div>
+<div class="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-icons-round">shopping_cart</span>
+</div>
+<div>
+<h3 class="font-bold text-lg text-text-primary-light dark:text-white">Покупки</h3>
+<p class="text-xs text-text-secondary-light dark:text-text-secondary-dark mt-1 truncate">Список</p>
+</div>
+</div>
+</div>
+<div class="fixed bottom-8 left-1/2 transform -translate-x-1/2 w-[90%] max-w-sm bg-white/90 dark:bg-card-dark/95 backdrop-blur-md shadow-lg rounded-full p-2 flex items-center justify-between z-50">
+<button class="flex-1 flex items-center justify-center py-3 rounded-full text-text-secondary-light dark:text-text-secondary-dark hover:bg-gray-50 dark:hover:bg-gray-800 transition">
+<span class="material-icons-round mr-2">adjust</span>
+<span class="font-medium text-sm">Фокус</span>
+</button>
+<button class="flex-1 flex items-center justify-center py-3 bg-primary text-white rounded-full shadow-md transition transform active:scale-95">
+<span class="material-icons-round mr-2">grid_view</span>
+<span class="font-medium text-sm">Полки</span>
+</button>
+</div>
+<div class="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background-light dark:from-background-dark to-transparent pointer-events-none z-40"></div>
+</div>
+
+</body></html>
