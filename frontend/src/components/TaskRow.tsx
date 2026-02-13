@@ -6,6 +6,7 @@ import { DeadlineIndicator } from "./DeadlineIndicator";
 import { FolderBadge } from "./FolderBadge";
 import { useHaptic } from "../hooks/useHaptic";
 import { useUIStore } from "../stores/uiStore";
+import { TapMotion } from "./TapMotion";
 
 type TaskRowProps = {
   task: Task;
@@ -84,27 +85,31 @@ function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: 
       id={`task-${task.id}`}
       className={`flex items-center gap-3 rounded-2xl bg-tg-secondary-bg p-4 ${isCompleting ? "opacity-60" : ""}`}
     >
-      <button
-        type="button"
-        aria-label={isCompleting ? "Отменить" : "Выполнить"}
-        onClick={handleComplete}
-        className="flex min-h-11 min-w-11 items-center justify-center rounded-full"
-      >
-        <span
-          className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${
-            isCompleting ? "border-green-500 bg-green-500" : "border-tg-hint"
-          }`}
+      <TapMotion>
+        <button
+          type="button"
+          aria-label={isCompleting ? "Отменить" : "Выполнить"}
+          onClick={handleComplete}
+          className="flex min-h-11 min-w-11 items-center justify-center rounded-full"
         >
-          {isCompleting && <span className="material-symbols-outlined text-sm text-white">check</span>}
-        </span>
-      </button>
+          <span
+            className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${
+              isCompleting ? "border-green-500 bg-green-500" : "border-tg-hint"
+            }`}
+          >
+            {isCompleting && <span className="material-symbols-outlined text-sm text-white">check</span>}
+          </span>
+        </button>
+      </TapMotion>
 
-      <button type="button" onClick={handleTap} className="flex-1 text-left">
-        <p className={`text-tg-text line-clamp-3 ${isCompleting ? "line-through" : ""}`}>{task.content}</p>
-        <div className="mt-1 flex items-center gap-2">
-          {task.deadline && <DeadlineIndicator deadline={task.deadline} size="sm" />}
-        </div>
-      </button>
+      <TapMotion className="flex-1">
+        <button type="button" onClick={handleTap} className="w-full text-left">
+          <p className={`text-tg-text line-clamp-3 ${isCompleting ? "line-through" : ""}`}>{task.content}</p>
+          <div className="mt-1 flex items-center gap-2">
+            {task.deadline && <DeadlineIndicator deadline={task.deadline} size="sm" />}
+          </div>
+        </button>
+      </TapMotion>
 
       <FolderBadge folder={task.folder} size="sm" />
 
