@@ -4,6 +4,7 @@ import { getFolderMeta, getSystemFallbackFolders, useFolders } from "../../api/f
 import { useCreateTask, type FolderSlug } from "../../api/tasks";
 import { useHaptic } from "../../hooks/useHaptic";
 import { FolderIcon } from "../FolderIcon";
+import { TapMotion } from "../TapMotion";
 
 type AddTaskSheetProps = {
   open: boolean;
@@ -87,17 +88,18 @@ export function AddTaskSheet({ open, onOpenChange }: AddTaskSheetProps) {
             {displayFolders.map((item) => {
               const meta = getFolderMeta(item.slug, folders);
               return (
-                <button
-                  key={item.slug}
-                  type="button"
-                  onClick={() => setFolder(item.slug)}
-                  className={`flex h-12 flex-col items-center justify-center rounded-xl text-xs ${
-                    folder === item.slug ? "bg-tg-button text-tg-button-text" : "bg-white/70 text-tg-text"
-                  }`}
-                >
-                  <FolderIcon icon={meta.icon} className="text-base leading-none" />
-                  <span className="mt-0.5 truncate px-1">{meta.displayName}</span>
-                </button>
+                <TapMotion key={item.slug}>
+                  <button
+                    type="button"
+                    onClick={() => setFolder(item.slug)}
+                    className={`flex h-12 w-full flex-col items-center justify-center rounded-xl text-xs ${
+                      folder === item.slug ? "bg-tg-button text-tg-button-text" : "bg-white/70 text-tg-text"
+                    }`}
+                  >
+                    <FolderIcon icon={meta.icon} className="text-base leading-none" />
+                    <span className="mt-0.5 truncate px-1">{meta.displayName}</span>
+                  </button>
+                </TapMotion>
               );
             })}
           </div>
@@ -122,14 +124,16 @@ export function AddTaskSheet({ open, onOpenChange }: AddTaskSheetProps) {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={createTask.isPending}
-            className="mt-4 h-11 w-full rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
-          >
-            {createTask.isPending ? "Создание..." : "Создать"}
-          </button>
+          <TapMotion>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={createTask.isPending}
+              className="mt-4 h-11 w-full rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
+            >
+              {createTask.isPending ? "Создание..." : "Создать"}
+            </button>
+          </TapMotion>
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
 import { motion, type PanInfo } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
 import {
   getFolderMeta,
   type FolderItem,
@@ -12,17 +12,11 @@ import {
 import { ApiError } from "../api/client";
 import { useHaptic } from "../hooks/useHaptic";
 import { FolderIcon } from "./FolderIcon";
+import { TapMotion } from "./TapMotion";
 
-const SWIPE_BACK_THRESHOLD = 30;
+const SWIPE_BACK_THRESHOLD = 50;
 const DEFAULT_ICONS = ["📁", "💼", "🏠", "💡", "📷", "📝", "🎯", "🎓", "💪", "🎨"];
 const DEFAULT_COLORS = ["#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899"];
-
-const pageTransition = {
-  initial: { x: 40, opacity: 0 },
-  animate: { x: 0, opacity: 1 },
-  exit: { x: -20, opacity: 0 },
-  transition: { type: "tween", ease: [0.25, 0.1, 0.25, 1], duration: 0.2 },
-};
 
 function getApiErrorMessage(error: unknown): string {
   if (!(error instanceof ApiError)) {
@@ -165,22 +159,22 @@ export function FolderManageView({ onBack }: FolderManageViewProps) {
 
   return (
     <motion.section
-      key="manage-folders"
       className="mx-auto w-full max-w-lg px-5 pb-36 pt-6"
-      {...pageTransition}
       drag="x"
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={{ left: 0, right: 0.4 }}
       onDragEnd={handleSwipeBack}
     >
       <header className="mb-5 flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-tg-secondary-bg text-icon-muted active:scale-95"
-        >
-          <span className="material-symbols-outlined text-xl">arrow_back</span>
-        </button>
+        <TapMotion>
+          <button
+            type="button"
+            onClick={onBack}
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-tg-secondary-bg text-icon-muted"
+          >
+            <span className="material-symbols-outlined text-xl">arrow_back</span>
+          </button>
+        </TapMotion>
         <div>
           <h1 className="text-xl font-bold text-tg-text">Управление папками</h1>
           <p className="text-sm text-tg-hint">{folders.length} папок</p>
@@ -242,14 +236,16 @@ export function FolderManageView({ onBack }: FolderManageViewProps) {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={handleCreate}
-          disabled={createFolder.isPending}
-          className="mt-4 h-11 w-full rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
-        >
-          {createFolder.isPending ? "Создаю..." : "Создать папку"}
-        </button>
+        <TapMotion>
+          <button
+            type="button"
+            onClick={handleCreate}
+            disabled={createFolder.isPending}
+            className="mt-4 h-11 w-full rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
+          >
+            {createFolder.isPending ? "Создаю..." : "Создать папку"}
+          </button>
+        </TapMotion>
       </div>
 
       {/* ── Folder list ── */}
@@ -280,22 +276,26 @@ export function FolderManageView({ onBack }: FolderManageViewProps) {
                 </div>
 
                 <div className="mt-3 flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => startEdit(folder)}
-                    className="h-9 rounded-lg bg-tg-bg px-3 text-xs font-medium text-tg-text"
-                  >
-                    Изменить
-                  </button>
-                  {!folder.isSystem && (
+                  <TapMotion>
                     <button
                       type="button"
-                      onClick={() => handleDelete(folder.slug)}
-                      disabled={deleteFolder.isPending}
-                      className="h-9 rounded-lg bg-red-500/15 px-3 text-xs font-medium text-red-600 disabled:opacity-60"
+                      onClick={() => startEdit(folder)}
+                      className="h-9 rounded-lg bg-tg-bg px-3 text-xs font-medium text-tg-text"
                     >
-                      Удалить
+                      Изменить
                     </button>
+                  </TapMotion>
+                  {!folder.isSystem && (
+                    <TapMotion>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(folder.slug)}
+                        disabled={deleteFolder.isPending}
+                        className="h-9 rounded-lg bg-red-500/15 px-3 text-xs font-medium text-red-600 disabled:opacity-60"
+                      >
+                        Удалить
+                      </button>
+                    </TapMotion>
                   )}
                 </div>
               </div>
@@ -360,21 +360,25 @@ export function FolderManageView({ onBack }: FolderManageViewProps) {
           )}
 
           <div className="mt-4 flex gap-2">
-            <button
-              type="button"
-              onClick={handleSaveEdit}
-              disabled={updateFolder.isPending}
-              className="h-11 flex-1 rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
-            >
-              {updateFolder.isPending ? "Сохраняю..." : "Сохранить"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditingSlug(null)}
-              className="h-11 flex-1 rounded-xl bg-tg-bg text-sm font-medium text-tg-text"
-            >
-              Отмена
-            </button>
+            <TapMotion className="flex-1">
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={updateFolder.isPending}
+                className="h-11 w-full rounded-xl bg-tg-button text-sm font-medium text-tg-button-text disabled:opacity-60"
+              >
+                {updateFolder.isPending ? "Сохраняю..." : "Сохранить"}
+              </button>
+            </TapMotion>
+            <TapMotion className="flex-1">
+              <button
+                type="button"
+                onClick={() => setEditingSlug(null)}
+                className="h-11 w-full rounded-xl bg-tg-bg text-sm font-medium text-tg-text"
+              >
+                Отмена
+              </button>
+            </TapMotion>
           </div>
         </div>
       )}
