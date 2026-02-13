@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import type { PanInfo } from "framer-motion";
 import { useFolders, getSystemFallbackFolders } from "../api/folders";
 import { useTasks, useUpdateTask, type FolderSlug, type Task } from "../api/tasks";
@@ -10,11 +10,36 @@ import { markShelvesFirstOpenReady } from "../lib/perf";
 import { ShelvesFolderView } from "./shelves/ShelvesFolderView";
 import { ShelvesArchiveView } from "./shelves/ShelvesArchiveView";
 import { ShelvesMainView } from "./shelves/ShelvesMainView";
+import { useBackButton } from "../hooks/useBackButton";
 
-const SWIPE_BACK_THRESHOLD = 30;
+const SWIPE_BACK_THRESHOLD = 50;
 const STORIES_SEEN_STORAGE_PREFIX = "idea-stories-seen";
 
 type SubView = { type: "folder"; folder: FolderSlug } | { type: "archive" } | { type: "manage" } | null;
+
+const viewVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? "100%" : "-100%",
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    zIndex: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? "-30%" : "100%",
+    opacity: 0,
+    zIndex: 0,
+  }),
+};
+
+const viewTransition = {
+  type: "spring",
+  stiffness: 380,
+  damping: 38,
+  mass: 1,
+};
 
 function getTasksByFolder(tasks: Task[], folder: FolderSlug): Task[] {
   return tasks.filter((task) => task.folder === folder && task.status !== "deleted");
@@ -81,12 +106,20 @@ export function ShelvesTab() {
   const openSettings = useUIStore((state) => state.openSettings);
   const [searchQuery, setSearchQuery] = useState("");
   const [subView, setSubView] = useState<SubView>(null);
+  const [direction, setDirection] = useState(1);
   const [orderedFolderTasks, setOrderedFolderTasks] = useState<Task[]>([]);
   const [seenStoryIds, setSeenStoryIds] = useState<Set<string>>(new Set());
   const [storyPreviewOpen, setStoryPreviewOpen] = useState(false);
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const selectedFolder = subView?.type === "folder" ? subView.folder : null;
   const isLoading = tasksLoading || foldersLoading;
+
+  const handleGoBack = useCallback(() => {
+    setDirection(-1);
+    setSubView(null);
+  }, []);
+
+  useBackButton(handleGoBack, subView !== null);
 
   useEffect(() => {
     if (isLoading) {
@@ -232,72 +265,111 @@ export function ShelvesTab() {
   const handleSwipeBack = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const force = info.offset.x + info.velocity.x * 0.3;
     if (force > SWIPE_BACK_THRESHOLD) {
-      setSubView(null);
+      handleGoBack();
     }
   };
 
-  if (subView?.type === "folder") {
-    const displayTasks = orderedFolderTasks.length ? orderedFolderTasks : folderTasks;
-
-    return (
-      <ShelvesFolderView
-        folder={subView.folder}
-        folders={folders}
-        displayTasks={displayTasks}
-        onBack={() => setSubView(null)}
-        onDragEnd={handleSwipeBack}
-        setOrderedFolderTasks={setOrderedFolderTasks}
-      />
-    );
-  }
-
-  if (subView?.type === "manage") {
-    return (
-      <AnimatePresence mode="wait">
-        <FolderManageView key="manage" onBack={() => setSubView(null)} />
-      </AnimatePresence>
-    );
-  }
-
-  if (subView?.type === "archive") {
-    return (
-      <ShelvesArchiveView
-        archivedTasks={archivedTasks}
-        archivedCount={archivedCount}
-        onBack={() => setSubView(null)}
-        onDragEnd={handleSwipeBack}
-        onRestoreTask={(taskId) => updateTask.mutate({ id: taskId, updates: { status: "active", completedAt: null } })}
-      />
-    );
-  }
+  const handleOpenSubView = (newView: SubView) => {
+    setDirection(1);
+    setSubView(newView);
+  };
 
   return (
-    <ShelvesMainView
-      tasks={tasks}
-      folders={folders}
-      isLoading={isLoading}
-      searchQuery={searchQuery}
-      searchResults={searchResults}
-      storiesEnabled={storiesEnabled}
-      stories={stories}
-      storyPreviewOpen={storyPreviewOpen}
-      activeStory={activeStory}
-      activeStoryIndex={activeStoryIndex}
-      archivedCount={archivedCount}
-      onOpenSettings={openSettings}
-      onSearchChange={setSearchQuery}
-      onStoryOpen={handleStoryOpen}
-      onStoryPreviewOpenChange={(open) => {
-        setStoryPreviewOpen(open);
-        if (!open) {
-          setActiveStoryId(null);
-        }
-      }}
-      onStoryStep={handleStoryStep}
-      onOpenStoryDetail={handleOpenStoryDetail}
-      onOpenManageView={() => setSubView({ type: "manage" })}
-      onOpenFolderView={(folder) => setSubView({ type: "folder", folder })}
-      onOpenArchiveView={() => setSubView({ type: "archive" })}
-    />
+    <div className="relative min-h-screen overflow-hidden">
+      <AnimatePresence initial={false} custom={direction} mode="popLayout">
+        {!subView ? (
+          <motion.div
+            key="main"
+            custom={direction}
+            variants={viewVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={viewTransition}
+            className="gpu-accelerated w-full"
+          >
+            <ShelvesMainView
+              tasks={tasks}
+              folders={folders}
+              isLoading={isLoading}
+              searchQuery={searchQuery}
+              searchResults={searchResults}
+              storiesEnabled={storiesEnabled}
+              stories={stories}
+              storyPreviewOpen={storyPreviewOpen}
+              activeStory={activeStory}
+              activeStoryIndex={activeStoryIndex}
+              archivedCount={archivedCount}
+              onOpenSettings={openSettings}
+              onSearchChange={setSearchQuery}
+              onStoryOpen={handleStoryOpen}
+              onStoryPreviewOpenChange={(open) => {
+                setStoryPreviewOpen(open);
+                if (!open) {
+                  setActiveStoryId(null);
+                }
+              }}
+              onStoryStep={handleStoryStep}
+              onOpenStoryDetail={handleOpenStoryDetail}
+              onOpenManageView={() => handleOpenSubView({ type: "manage" })}
+              onOpenFolderView={(folder) => handleOpenSubView({ type: "folder", folder })}
+              onOpenArchiveView={() => handleOpenSubView({ type: "archive" })}
+            />
+          </motion.div>
+        ) : subView.type === "folder" ? (
+          <motion.div
+            key={`folder-${subView.folder}`}
+            custom={direction}
+            variants={viewVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={viewTransition}
+            className="gpu-accelerated w-full"
+          >
+            <ShelvesFolderView
+              folder={subView.folder}
+              folders={folders}
+              displayTasks={orderedFolderTasks.length ? orderedFolderTasks : folderTasks}
+              onBack={handleGoBack}
+              onDragEnd={handleSwipeBack}
+              setOrderedFolderTasks={setOrderedFolderTasks}
+            />
+          </motion.div>
+        ) : subView.type === "manage" ? (
+          <motion.div
+            key="manage"
+            custom={direction}
+            variants={viewVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={viewTransition}
+            className="gpu-accelerated w-full"
+          >
+            <FolderManageView onBack={handleGoBack} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="archive"
+            custom={direction}
+            variants={viewVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            transition={viewTransition}
+            className="gpu-accelerated w-full"
+          >
+            <ShelvesArchiveView
+              archivedTasks={archivedTasks}
+              archivedCount={archivedCount}
+              onBack={handleGoBack}
+              onDragEnd={handleSwipeBack}
+              onRestoreTask={(taskId) => updateTask.mutate({ id: taskId, updates: { status: "active", completedAt: null } })}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }
