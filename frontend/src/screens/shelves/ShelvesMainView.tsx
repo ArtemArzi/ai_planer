@@ -3,6 +3,7 @@ import { getFolderMeta, toAlphaColor, type FolderItem } from "../../api/folders"
 import type { FolderSlug, Task } from "../../api/tasks";
 import { SearchBar, highlightText } from "../../components/SearchBar";
 import { FolderIcon, isMaterialIconGlyph, resolveFolderIconGlyph } from "../../components/FolderIcon";
+import { TapMotion } from "../../components/TapMotion";
 
 const EMOJI_REGEX = /^(\p{Extended_Pictographic}|\p{Emoji_Presentation})/u;
 
@@ -129,7 +130,11 @@ export function ShelvesMainView({
             <h2 className="text-lg font-bold text-tg-text">Истории идей</h2>
           </div>
 
-          <div className="no-scrollbar -mx-1 flex overflow-x-auto px-1 pb-1 pr-4" style={{ gap: "1.5rem" }}>
+          <div
+            className="no-scrollbar -mx-1 flex overflow-x-auto px-1 pb-1 pr-4"
+            style={{ gap: "1.5rem" }}
+            onPointerDown={(e) => e.stopPropagation()}
+          >
             {stories.map(({ task, seen }) => {
               const parsedIdea = parseIdeaContent(task.content);
               const visual = getStoryVisual(task.id);
@@ -137,29 +142,30 @@ export function ShelvesMainView({
               const storyIcon = isMaterialIconGlyph(resolvedStoryIcon) ? resolvedStoryIcon : visual.icon;
 
               return (
-                <button
-                  key={`story-${task.id}`}
-                  type="button"
-                  onClick={() => onStoryOpen(task.id)}
-                  className="group relative flex shrink-0 flex-col items-center transition-transform active:scale-95"
-                  style={{ width: "88px" }}
-                >
-                  <div
-                    className={`relative flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(45deg,#f09433_0%,#e6683c_25%,#dc2743_50%,#cc2366_75%,#bc1888_100%)] p-[3px] transition-opacity ${seen ? "opacity-55" : "opacity-100"}`}
+                <TapMotion key={`story-${task.id}`}>
+                  <button
+                    type="button"
+                    onClick={() => onStoryOpen(task.id)}
+                    className="group relative flex shrink-0 flex-col items-center"
+                    style={{ width: "88px" }}
                   >
-                    <div className="h-full w-full overflow-hidden rounded-full bg-white p-[2px] dark:bg-gray-800">
-                      <div className="flex h-full w-full items-center justify-center rounded-full" style={{ background: visual.gradient }}>
-                        <FolderIcon icon={storyIcon} className="leading-none text-white" style={{ fontSize: "40px" }} />
+                    <div
+                      className={`relative flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(45deg,#f09433_0%,#e6683c_25%,#dc2743_50%,#cc2366_75%,#bc1888_100%)] p-[3px] transition-opacity ${seen ? "opacity-55" : "opacity-100"}`}
+                    >
+                      <div className="h-full w-full overflow-hidden rounded-full bg-white p-[2px] dark:bg-gray-800">
+                        <div className="flex h-full w-full items-center justify-center rounded-full" style={{ background: visual.gradient }}>
+                          <FolderIcon icon={storyIcon} className="leading-none text-white" style={{ fontSize: "40px" }} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <span
-                    className={`mt-2 block w-full truncate px-1 text-center font-medium leading-tight ${seen ? "text-tg-hint" : "text-tg-text"}`}
-                    style={{ fontSize: "11px" }}
-                  >
-                    {parsedIdea.shortTitle || "Идея"}
-                  </span>
-                </button>
+                    <span
+                      className={`mt-2 block w-full truncate px-1 text-center font-medium leading-tight ${seen ? "text-tg-hint" : "text-tg-text"}`}
+                      style={{ fontSize: "11px" }}
+                    >
+                      {parsedIdea.shortTitle || "Идея"}
+                    </span>
+                  </button>
+                </TapMotion>
               );
             })}
           </div>
@@ -279,28 +285,29 @@ export function ShelvesMainView({
                 const taskCount = countByFolder(tasks, folder.slug);
 
                 return (
-                  <button
-                    key={folder.slug}
-                    type="button"
-                    onClick={() => onOpenFolderView(folder.slug as FolderSlug)}
-                    className="flex aspect-square cursor-pointer flex-col justify-between rounded-2xl bg-tg-secondary-bg p-5 text-left transition-transform active:scale-95"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div
-                        className="flex h-11 w-11 items-center justify-center rounded-2xl"
-                        style={{ backgroundColor: iconBg }}
-                      >
-                        <FolderIcon icon={meta.icon} className="text-xl leading-none" style={{ color: meta.color }} />
+                  <TapMotion key={folder.slug}>
+                    <button
+                      type="button"
+                      onClick={() => onOpenFolderView(folder.slug as FolderSlug)}
+                      className="flex aspect-square w-full cursor-pointer flex-col justify-between rounded-2xl bg-tg-secondary-bg p-5 text-left"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div
+                          className="flex h-11 w-11 items-center justify-center rounded-2xl"
+                          style={{ backgroundColor: iconBg }}
+                        >
+                          <FolderIcon icon={meta.icon} className="text-xl leading-none" style={{ color: meta.color }} />
+                        </div>
+                        <span className="rounded-lg bg-black/5 px-2 py-0.5 text-xs font-semibold text-tg-hint">
+                          {taskCount}
+                        </span>
                       </div>
-                      <span className="rounded-lg bg-black/5 px-2 py-0.5 text-xs font-semibold text-tg-hint">
-                        {taskCount}
-                      </span>
-                    </div>
-                    <div>
-                      <p className="truncate font-medium text-tg-text">{meta.displayName}</p>
-                      <p className="mt-0.5 truncate text-xs text-tg-hint">{meta.subtitle}</p>
-                    </div>
-                  </button>
+                      <div>
+                        <p className="truncate font-medium text-tg-text">{meta.displayName}</p>
+                        <p className="mt-0.5 truncate text-xs text-tg-hint">{meta.subtitle}</p>
+                      </div>
+                    </button>
+                  </TapMotion>
                 );
               })}
             </div>
@@ -308,25 +315,27 @@ export function ShelvesMainView({
         </>
       )}
 
-      <button
-        type="button"
-        onClick={onOpenArchiveView}
-        className="mt-5 flex w-full cursor-pointer items-center justify-between rounded-2xl bg-tg-secondary-bg p-4 text-left transition-all active:scale-[0.98]"
-      >
-        <div className="flex items-center gap-4">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/5">
-            <span className="material-symbols-outlined text-xl text-icon-muted">archive</span>
+      <TapMotion>
+        <button
+          type="button"
+          onClick={onOpenArchiveView}
+          className="mt-5 flex w-full cursor-pointer items-center justify-between rounded-2xl bg-tg-secondary-bg p-4 text-left"
+        >
+          <div className="flex items-center gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-black/5">
+              <span className="material-symbols-outlined text-xl text-icon-muted">archive</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-tg-text">Архив</p>
+              <p className="text-xs text-tg-hint">Завершённые задачи</p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm font-medium text-tg-text">Архив</p>
-            <p className="text-xs text-tg-hint">Завершённые задачи</p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-tg-hint">{archivedCount}</span>
+            <span className="material-symbols-outlined text-lg text-icon-muted">chevron_right</span>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-tg-hint">{archivedCount}</span>
-          <span className="material-symbols-outlined text-lg text-icon-muted">chevron_right</span>
-        </div>
-      </button>
+        </button>
+      </TapMotion>
     </section>
   );
 }
