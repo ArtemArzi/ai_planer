@@ -1,11 +1,18 @@
 // LAZY FLOW - Shared Type Definitions
 // ALL timestamps are in MILLISECONDS (JavaScript Date.now() format)
 
+// ===== FOLDER TYPES =====
+export const SYSTEM_FOLDER_SLUGS = ['work', 'personal', 'ideas', 'media', 'notes'] as const;
+export type SystemFolderSlug = typeof SYSTEM_FOLDER_SLUGS[number];
+export type FolderSlug = string;
+/** @deprecated Use FolderSlug */
+export type Folder = FolderSlug;
+
 // ===== CORE ENUMS =====
-export type Folder = 'work' | 'personal' | 'ideas' | 'media' | 'notes';
 export type TaskStatus = 'inbox' | 'active' | 'backlog' | 'done' | 'archived' | 'deleted';
 export type TaskType = 'task' | 'note';
 export type TaskSource = 'bot' | 'miniapp' | 'calendar';
+export type RecurrenceRule = 'daily' | 'weekdays' | 'weekly';
 export type MediaType = 'photo' | 'document' | 'voice' | 'link';
 export type TranscriptionStatus = 'pending' | 'completed' | 'failed';
 export type QueueJobStatus = 'pending' | 'processing' | 'completed' | 'failed';
@@ -17,14 +24,16 @@ export interface TaskDTO {
   id: string;
   userId: number;
   content: string;
+  description: string | null;
   type: TaskType;
   status: TaskStatus;
-  folder: Folder;
+  folder: FolderSlug;
   isIdea: boolean;
   isMixerResurfaced: boolean;
   deadline: number | null;           // ms timestamp
   scheduledDate: string | null;      // YYYY-MM-DD
   scheduledTime: string | null;      // HH:MM
+  recurrenceRule: RecurrenceRule | null;
   googleEventId: string | null;
   createdAt: number;                 // ms
   updatedAt: number;                 // ms
@@ -80,14 +89,16 @@ export interface TaskRow {
   id: string;
   user_id: number;
   content: string;
+  description: string | null;
   type: TaskType;
   status: TaskStatus;
-  folder: Folder;
-  is_idea: number;                   // SQLite stores as 0/1
+  folder: FolderSlug;
+  is_idea: number;
   is_mixer_resurfaced: number;
   deadline: number | null;
   scheduled_date: string | null;
   scheduled_time: string | null;
+  recurrence_rule: RecurrenceRule | null;
   google_event_id: string | null;
   created_at: number;
   updated_at: number;
@@ -156,6 +167,33 @@ export interface MediaQueueRow {
   last_error: string | null;
 }
 
+// ===== FOLDER ROW / DTO =====
+export interface FolderRow {
+  id: string;
+  user_id: number;
+  slug: string;
+  display_name: string;
+  is_system: number;
+  icon: string;
+  color: string;
+  position: number;
+  created_at: number;
+  updated_at: number;
+}
+
+export interface FolderDTO {
+  id: string;
+  userId: number;
+  slug: string;
+  displayName: string;
+  isSystem: boolean;
+  icon: string;
+  color: string;
+  position: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
 // ===== API TYPES =====
 export interface APIError {
   error: string;
@@ -169,19 +207,33 @@ export interface PaginatedResponse<T> {
   hasMore: boolean;
 }
 
+// ===== DATE PARSING TYPES =====
+export interface DateParseResult {
+  scheduledDate: string | null;       // YYYY-MM-DD
+  scheduledTime: string | null;       // HH:mm
+  deadline: number | null;            // ms timestamp (if both date+time present)
+  recurrenceRule: RecurrenceRule | null;
+  strippedContent: string;            // Text with date phrases removed
+  confidence: 'high' | 'medium' | 'low' | 'none';
+}
+
 // ===== CAPTURE TYPES =====
 export interface CaptureResult {
   content: string;
-  folder: Folder;
+  folder: FolderSlug;
   type: TaskType;
   status: TaskStatus;
   mediaType?: MediaType;
   needsAiClassification: boolean;
   hasExplicitTag: boolean;
+  scheduledDate?: string | null;
+  scheduledTime?: string | null;
+  deadline?: number | null;
+  recurrenceRule?: RecurrenceRule | null;
 }
 
 export interface AIClassificationResult {
-  folder: Folder;
+  folder: FolderSlug;
   confidence: number;
 }
 
