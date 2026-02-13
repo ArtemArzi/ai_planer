@@ -149,7 +149,7 @@ function saveStoriesSeenSet(storageKey: string, seenIds: Set<string>): void {
 }
 
 export function ShelvesTab() {
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks({ limit: 500 });
+  const { data: tasks = [], isLoading: tasksLoading } = useTasks({ limit: 150 });
   const { data: me } = useMe();
   const { data: foldersData = [], isLoading: foldersLoading } = useFolders();
   const folders = useMemo(

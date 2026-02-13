@@ -1,8 +1,4 @@
-{
-  email {$ACME_EMAIL}
-}
-
-{$DOMAIN} {
+:80 {
   encode zstd gzip
 
   root * /srv
@@ -22,12 +18,4 @@
     X-Frame-Options SAMEORIGIN
     Referrer-Policy strict-origin-when-cross-origin
   }
-}
-
-http://localhost {
-  handle /health {
-    reverse_proxy app:3000
-  }
-
-  respond 200
 }
