@@ -1,5 +1,4 @@
 import type { Database } from "bun:sqlite";
-import { db } from "../db";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -12,7 +11,7 @@ export type MixerRunResult = {
   skippedByIdempotency: boolean;
 };
 
-export function runMixerEngine(userId: number, database: Database = db): MixerRunResult {
+export function runMixerEngine(userId: number, database: Database): MixerRunResult {
   const now = Date.now();
   const oneDayAgo = now - DAY_MS;
   const fourteenDaysAgo = now - 14 * DAY_MS;

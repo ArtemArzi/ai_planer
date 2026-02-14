@@ -15,6 +15,7 @@ import {
 import { SYSTEM_FOLDER_SLUGS } from '../lib/types';
 import { MAX_CUSTOM_FOLDERS, FOLDER_ICONS, FOLDER_COLORS, RESERVED_SLUGS } from '../lib/folderDefaults';
 import { formatFolderContextForPrompt } from '../lib/ai/folderContext';
+import { db } from '../db';
 import type { FolderContext } from '../lib/ai/folderContext';
 
 describe('slugify', () => {
@@ -57,7 +58,6 @@ describe('folder CRUD', () => {
   const TEST_USER_2 = 999889;
 
   beforeEach(() => {
-    const { db } = require('../db/index');
     db.run('DELETE FROM folders WHERE user_id IN (?, ?)', [TEST_USER, TEST_USER_2]);
     db.run('DELETE FROM tasks WHERE user_id IN (?, ?)', [TEST_USER, TEST_USER_2]);
     db.run('INSERT OR IGNORE INTO users (telegram_id, created_at, updated_at) VALUES (?, ?, ?)',
@@ -101,8 +101,7 @@ describe('folder CRUD', () => {
     });
 
     it('normalizes legacy system folders icon/color/system flag', () => {
-      const { db } = require('../db/index');
-      const now = Date.now();
+        const now = Date.now();
 
       db.run(
         `UPDATE folders
@@ -307,8 +306,7 @@ describe('folder CRUD', () => {
   describe('deleteFolder', () => {
     it('deletes custom folder and re-homes tasks', () => {
       createFolder(TEST_USER, { displayName: 'Temp' });
-      const { db } = require('../db/index');
-      const now = Date.now();
+        const now = Date.now();
       db.run(`INSERT INTO tasks (id, user_id, content, folder, status, created_at, updated_at, last_interaction_at, source)
         VALUES ('t1', ?, 'task in temp', 'temp', 'active', ?, ?, ?, 'bot')`,
         [TEST_USER, now, now, now]);

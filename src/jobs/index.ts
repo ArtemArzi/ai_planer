@@ -5,6 +5,7 @@ import { runMorningDigest, runDeadlineReminders, runSunsetNotifications } from "
 import { recoverStuckJobs } from "./startup";
 import { startMediaQueueProcessor, stopMediaQueueProcessor } from "./mediaQueue";
 import { getAllUserIds } from "../db/users";
+import { db } from "../db";
 import {
   archiveOldDoneTasks,
   cleanupOldQueueJobs,
@@ -69,7 +70,7 @@ export function registerBackgroundJobs(): void {
     const userIds = getAllUserIds();
     let totalResurfaced = 0;
     for (const userId of userIds) {
-      const result = runMixerEngine(userId);
+      const result = runMixerEngine(userId, db);
       if (!result.skippedByIdempotency && result.resurfacedTaskIds.length > 0) {
         totalResurfaced += result.resurfacedTaskIds.length;
       }

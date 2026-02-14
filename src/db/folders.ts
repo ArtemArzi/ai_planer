@@ -1,4 +1,5 @@
-import { db, generateId } from './index';
+import { db } from './index';
+import { generateId } from './helpers';
 import type { FolderDTO, FolderRow } from '../lib/types';
 import { SYSTEM_FOLDER_DEFAULTS, isReservedSlug, isSystemSlug, isValidIcon, isValidColor, MAX_CUSTOM_FOLDERS } from '../lib/folderDefaults';
 import type { SystemFolderSlug } from '../lib/types';

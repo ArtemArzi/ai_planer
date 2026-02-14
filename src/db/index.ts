@@ -1,9 +1,9 @@
 import { Database } from 'bun:sqlite';
 import { readFileSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { ensureSystemFolders } from './folders';
+import { SYSTEM_FOLDER_DEFAULTS } from '../lib/folderDefaults';
 
-const DB_PATH = process.env.DB_PATH || (process.env.NODE_ENV === 'production' ? '/app/data/lazyflow.db' : './data/lazyflow.db');
+const DB_PATH = process.env.DB_PATH || './data/lazyflow.db';
 try {
   mkdirSync(dirname(DB_PATH), { recursive: true });
 } catch {}
@@ -120,14 +120,33 @@ function seedFoldersForExistingUsers(): void {
   const users = db.query<{ telegram_id: number }, []>(
     'SELECT telegram_id FROM users'
   ).all();
-  
-  for (const user of users) {
-    ensureSystemFolders(user.telegram_id);
+
+  if (users.length === 0) {
+    return;
   }
-  
-  if (users.length > 0) {
-    console.log(`[Migration] Seeded system folders for ${users.length} existing users`);
-  }
+
+  const tx = db.transaction(() => {
+    for (const user of users) {
+      for (const defaults of Object.values(SYSTEM_FOLDER_DEFAULTS)) {
+        const existing = db.query<{ id: string }, [number, string]>(
+          'SELECT id FROM folders WHERE user_id = ? AND slug = ?'
+        ).get(user.telegram_id, defaults.slug);
+
+        if (existing) continue;
+
+        const id = crypto.randomUUID();
+        const now = Date.now();
+        db.run(
+          `INSERT INTO folders (id, user_id, slug, display_name, is_system, icon, color, position, created_at, updated_at)
+           VALUES (?, ?, ?, ?, 1, ?, ?, ?, ?, ?)`,
+          [id, user.telegram_id, defaults.slug, defaults.displayName, defaults.icon, defaults.color, defaults.position, now, now]
+        );
+      }
+    }
+  });
+
+  tx();
+  console.log(`[Migration] Seeded system folders for ${users.length} existing users`);
 }
 
 function runMigrations(): void {
@@ -151,4 +170,3 @@ runMigrations();
 console.log('✅ Database initialized at', DB_PATH);
 
 export * from './helpers';
-export * from './folders';
