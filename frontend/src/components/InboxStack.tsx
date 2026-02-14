@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInboxTasks, useUpdateTask } from "../api/tasks";
 import { useHaptic } from "../hooks/useHaptic";
@@ -10,8 +10,7 @@ type SwipeDirection = "left" | "right" | "up" | "down";
 const SWIPE_HINT_KEY = "swipe_hint_shown";
 
 export function InboxStack() {
-  const { data: rawTasks = [], isLoading } = useInboxTasks();
-  const tasks = useMemo(() => rawTasks.filter((t) => t.folder !== "notes" && t.folder !== "ideas"), [rawTasks]);
+  const { data: tasks = [], isLoading } = useInboxTasks();
   const updateTask = useUpdateTask();
   const addPendingUndo = useUIStore((state) => state.addPendingUndo);
   const removePendingUndo = useUIStore((state) => state.removePendingUndo);

@@ -14,6 +14,7 @@ import { useBackButton } from "../hooks/useBackButton";
 
 const SWIPE_BACK_THRESHOLD = 50;
 const STORIES_SEEN_STORAGE_PREFIX = "idea-stories-seen";
+const SHELVES_SYNC_INTERVAL_MS = 10 * 1000;
 
 type SubView = { type: "folder"; folder: FolderSlug } | { type: "archive" } | { type: "manage" } | null;
 
@@ -42,7 +43,13 @@ const viewTransition = {
 };
 
 function getTasksByFolder(tasks: Task[], folder: FolderSlug): Task[] {
-  return tasks.filter((task) => task.folder === folder && task.status !== "deleted");
+  return tasks.filter(
+    (task) =>
+      task.folder === folder &&
+      task.status !== "deleted" &&
+      task.status !== "done" &&
+      task.status !== "archived",
+  );
 }
 
 function getArchivedTasks(tasks: Task[]): Task[] {
@@ -95,7 +102,7 @@ function saveStoriesSeenSet(storageKey: string, seenIds: Set<string>): void {
 }
 
 export function ShelvesTab() {
-  const { data: tasks = [], isLoading: tasksLoading } = useTasks({ limit: 150 });
+  const { data: tasks = [], isLoading: tasksLoading } = useTasks({ limit: 150 }, { refetchInterval: SHELVES_SYNC_INTERVAL_MS });
   const { data: me } = useMe();
   const { data: foldersData = [], isLoading: foldersLoading } = useFolders();
   const folders = useMemo(

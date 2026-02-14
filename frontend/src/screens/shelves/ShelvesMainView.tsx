@@ -34,7 +34,13 @@ function getStoryVisual(taskId: string): StoryVisual {
 }
 
 function countByFolder(tasks: Task[], folder: FolderSlug): number {
-  return tasks.filter((task) => task.folder === folder && task.status !== "deleted").length;
+  return tasks.filter(
+    (task) =>
+      task.folder === folder &&
+      task.status !== "deleted" &&
+      task.status !== "done" &&
+      task.status !== "archived",
+  ).length;
 }
 
 function parseIdeaContent(content: string) {

@@ -4,6 +4,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const PERSIST_MAX_AGE_MS = 6 * 60 * 60 * 1000;
+const TASK_QUERY_STALE_MS = 10 * 1000;
 
 function shouldPersistQueryKey(queryKey: readonly unknown[]): boolean {
   const root = queryKey[0];
@@ -35,11 +36,11 @@ function shouldPersistQueryKey(queryKey: readonly unknown[]): boolean {
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30 * 1000,
+      staleTime: TASK_QUERY_STALE_MS,
       gcTime: DAY_MS,
       retry: 2,
       networkMode: "offlineFirst",
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
     },
     mutations: {

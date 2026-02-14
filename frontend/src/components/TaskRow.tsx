@@ -23,6 +23,8 @@ function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: 
   const setIsDraggingTask = useUIStore((state) => state.setIsDraggingTask);
   const haptic = useHaptic();
   const isCompleting = pendingUndos.has(task.id);
+  const isDone = task.status === "done" || task.status === "archived";
+  const isCompletedVisual = isCompleting || isDone;
 
   const showCelebration = useCallback(() => {
     const element = document.getElementById(`task-${task.id}`);
@@ -32,6 +34,10 @@ function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: 
   }, [task.id]);
 
   const handleComplete = useCallback(() => {
+    if (isDone) {
+      return;
+    }
+
     if (isCompleting) {
       removePendingUndo(task.id);
       return;
@@ -58,6 +64,7 @@ function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: 
     addPendingUndo,
     haptic,
     isCompleting,
+    isDone,
     removePendingUndo,
     showCelebration,
     task.id,
@@ -83,28 +90,29 @@ function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: 
       layout={enableLayoutAnimation}
       transition={enableLayoutAnimation ? { layout: { type: "spring", stiffness: 320, damping: 34 } } : undefined}
       id={`task-${task.id}`}
-      className={`flex items-center gap-3 rounded-2xl bg-tg-secondary-bg p-4 ${isCompleting ? "opacity-60" : ""}`}
+      className={`flex items-center gap-3 rounded-2xl bg-tg-secondary-bg p-4 ${isCompletedVisual ? "opacity-60" : ""}`}
     >
       <TapMotion>
         <button
           type="button"
-          aria-label={isCompleting ? "Отменить" : "Выполнить"}
+          aria-label={isDone ? "Выполнено" : isCompleting ? "Отменить" : "Выполнить"}
           onClick={handleComplete}
-          className="flex min-h-11 min-w-11 items-center justify-center rounded-full"
+          disabled={isDone}
+          className={`flex min-h-11 min-w-11 items-center justify-center rounded-full ${isDone ? "cursor-default" : ""}`}
         >
           <span
             className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition-colors ${
-              isCompleting ? "border-green-500 bg-green-500" : "border-tg-hint"
+              isCompletedVisual ? "border-green-500 bg-green-500" : "border-tg-hint"
             }`}
           >
-            {isCompleting && <span className="material-symbols-outlined text-sm text-white">check</span>}
+            {isCompletedVisual && <span className="material-symbols-outlined text-sm text-white">check</span>}
           </span>
         </button>
       </TapMotion>
 
       <TapMotion className="flex-1">
         <button type="button" onClick={handleTap} className="w-full text-left">
-          <p className={`text-tg-text line-clamp-3 ${isCompleting ? "line-through" : ""}`}>{task.content}</p>
+          <p className={`text-tg-text line-clamp-3 ${isCompletedVisual ? "line-through" : ""}`}>{task.content}</p>
           <div className="mt-1 flex items-center gap-2">
             {task.deadline && <DeadlineIndicator deadline={task.deadline} size="sm" />}
           </div>

@@ -77,7 +77,7 @@ export function registerBackgroundJobs(): void {
     if (totalResurfaced > 0) {
       console.log(`[Jobs] Mixer resurfaced ${totalResurfaced} tasks across ${userIds.length} users`);
     }
-  });
+  }, "Asia/Yekaterinburg");
 
   registerCron("morning-digest", "* * * * *", async () => {
     const sent = await runMorningDigest();

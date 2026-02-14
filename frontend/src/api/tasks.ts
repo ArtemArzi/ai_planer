@@ -3,6 +3,9 @@ import { useMutation, useQuery, useQueryClient, type QueryKey } from "@tanstack/
 import { hapticFeedback } from "@telegram-apps/sdk-react";
 import { apiClient } from "./client";
 
+const TASK_QUERY_STALE_MS = 10 * 1000;
+const TASK_SYNC_INTERVAL_MS = 10 * 1000;
+
 export type TaskStatus = "inbox" | "active" | "backlog" | "done" | "archived" | "deleted";
 export type FolderSlug = string;
 /** @deprecated Use FolderSlug */
@@ -41,6 +44,7 @@ type TasksFilter = {
 
 type TasksQueryOptions = {
   enabled?: boolean;
+  refetchInterval?: number | false;
 };
 
 type TaskUpdatePayload = Partial<Omit<Task, "id" | "userId" | "createdAt">> & {
@@ -138,18 +142,19 @@ export function useTasks(filter: TasksFilter = {}, options: TasksQueryOptions = 
   return useQuery({
     queryKey: ["tasks", filter],
     queryFn: () => fetchTasks(filter),
-    staleTime: 30 * 1000,
+    staleTime: TASK_QUERY_STALE_MS,
     enabled: options.enabled ?? true,
+    refetchInterval: options.refetchInterval,
   });
 }
 
 export function useInboxTasks() {
-  return useTasks({ status: "inbox" });
+  return useTasks({ status: "inbox" }, { refetchInterval: TASK_SYNC_INTERVAL_MS });
 }
 
 export function useTodayTasks() {
   const todayDate = getTodayDateString();
-  const query = useTasks({ status: "active", forDate: todayDate });
+  const query = useTasks({ status: "active", forDate: todayDate }, { refetchInterval: TASK_SYNC_INTERVAL_MS });
 
   const sorted = useMemo(() => {
     if (!query.data) {
@@ -180,7 +185,7 @@ export function useUpcomingTasks(forDate = getTodayDateString()) {
   return useQuery({
     queryKey: ["tasks", "upcoming", forDate],
     queryFn: () => fetchUpcomingTasks(forDate),
-    staleTime: 30 * 1000,
+    staleTime: TASK_QUERY_STALE_MS,
   });
 }
 
