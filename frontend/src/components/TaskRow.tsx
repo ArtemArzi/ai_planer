@@ -16,13 +16,12 @@ type TaskRowProps = {
 
 function TaskRowComponent({ task, dragControls, enableLayoutAnimation = true }: TaskRowProps) {
   const updateTask = useUpdateTask();
-  const pendingUndos = useUIStore((state) => state.pendingUndos);
+  const isCompleting = useUIStore((state) => state.pendingUndos.has(task.id));
   const addPendingUndo = useUIStore((state) => state.addPendingUndo);
   const removePendingUndo = useUIStore((state) => state.removePendingUndo);
   const openTaskDetail = useUIStore((state) => state.openTaskDetail);
   const setIsDraggingTask = useUIStore((state) => state.setIsDraggingTask);
   const haptic = useHaptic();
-  const isCompleting = pendingUndos.has(task.id);
   const isDone = task.status === "done" || task.status === "archived";
   const isCompletedVisual = isCompleting || isDone;
 

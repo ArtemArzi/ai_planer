@@ -139,12 +139,16 @@ async function postTaskGoogleCalendarAction(payload: {
 }
 
 export function useTasks(filter: TasksFilter = {}, options: TasksQueryOptions = {}) {
+  const interval = options.refetchInterval;
+
   return useQuery({
     queryKey: ["tasks", filter],
     queryFn: () => fetchTasks(filter),
     staleTime: TASK_QUERY_STALE_MS,
     enabled: options.enabled ?? true,
-    refetchInterval: options.refetchInterval,
+    refetchInterval: typeof interval === "number"
+      ? () => (document.visibilityState === "visible" ? interval : false)
+      : interval,
   });
 }
 
