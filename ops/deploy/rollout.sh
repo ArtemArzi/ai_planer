@@ -27,7 +27,7 @@ echo "Building frontend artifact"
 ./scripts/build-frontend-prod.sh
 
 echo "Running tests"
-DB_PATH=./data/lazyflow.test.db bun test
+DB_PATH=./data/lazyflow.test.db BOT_TOKEN=test-token WEBHOOK_SECRET=test-secret bun test
 
 echo "Creating pre-deploy backup"
 BACKUP_FILE="$(./ops/backup/sqlite-backup.sh | tail -n 1)"
