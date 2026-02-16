@@ -83,6 +83,11 @@ export const env = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
 
+  // Contextual split feature flags
+  AI_CONTEXT_SPLIT_ENABLED: process.env.AI_CONTEXT_SPLIT_ENABLED === 'true',
+  AI_CONTEXT_SPLIT_MODE: (process.env.AI_CONTEXT_SPLIT_MODE || 'off') as 'off' | 'shadow' | 'apply',
+  AI_CONTEXT_SPLIT_TIMEOUT_MS: parseInt(process.env.AI_CONTEXT_SPLIT_TIMEOUT_MS || '3000', 10),
+
   // Optional - Google Calendar
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID || '',
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET || '',

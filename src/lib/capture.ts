@@ -1,5 +1,7 @@
 import type { FolderSlug, TaskType, TaskStatus, MediaType, CaptureResult } from './types';
 import { parseDateFromText } from './dateParser';
+import { cleanCapturedText } from './captureCleanup';
+import { isSafePartialPrefix } from './capturePrefixPolicy';
 
 export type FolderPrefixAliases = Record<string, FolderSlug>;
 
@@ -136,7 +138,7 @@ function matchExplicitFolderPrefix(text: string, folderAliases: FolderPrefixAlia
   }
 
   const token = normalizeAlias(tokenMatch[1]);
-  if (token.length < 3) {
+  if (!isSafePartialPrefix(token, aliases)) {
     return null;
   }
 
@@ -331,8 +333,11 @@ export function processMessage(text: string, context: MediaContext & { timezone?
     needsAiClassification = false;
   }
 
+  const cleanedResult = cleanCapturedText(content);
+  const finalContent = cleanedResult.content.replace(/^[\s:\-]+/, '').trim();
+
   return {
-    content,
+    content: finalContent,
     folder,
     type,
     status,

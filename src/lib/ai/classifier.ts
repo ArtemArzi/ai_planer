@@ -1,6 +1,7 @@
 import type { FolderSlug, AIClassificationResult } from '../types';
 import type { FolderContext } from './folderContext';
 import { formatFolderContextForPrompt } from './folderContext';
+import { GENERAL_AI_POLICY } from './promptPolicy';
 
 const DEFAULT_FOLDERS = ['work', 'personal', 'ideas'] as const;
 
@@ -68,11 +69,9 @@ Allowed folders:
 - personal: daily life, home, errands, health, personal admin
 - ideas: brainstorms, concepts, future possibilities, creative thoughts
 
-Rules:
-1) Return ONLY JSON (no prose, no markdown).
-2) Use this exact schema: {"folder":"work|personal|ideas","confidence":0.0-1.0}
-3) If uncertain, prefer "personal".
-4) confidence must be a number from 0 to 1.`;
+${GENERAL_AI_POLICY}
+
+Schema: {"folder":"work|personal|ideas","confidence":0.0-1.0}`;
   }
 
   const slugs = folderContext.folders.map((f) => f.slug);
@@ -85,16 +84,9 @@ ${folderList}
 
 Allowed folder slugs: ${slugs.join(', ')}
 
-Decision rules:
-1) Prefer exact mention of folder display name/slug in task text.
-2) Otherwise match by semantics and examples.
-3) For creative concepts/someday thoughts, prefer ideas-like folder.
-4) If uncertain, use "personal" when available; otherwise choose the closest folder.
+${GENERAL_AI_POLICY}
 
-Output rules:
-- Return ONLY JSON (no prose, no markdown).
-- Use schema: {"folder":"<one allowed slug>","confidence":0.0-1.0}
-- confidence must be numeric in [0,1].`;
+Schema: {"folder":"<one allowed slug>","confidence":0.0-1.0}`;
 }
 
 export class OpenAIClassifier implements AIClassifier {

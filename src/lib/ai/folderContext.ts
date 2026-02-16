@@ -1,6 +1,6 @@
 import { db } from '../../db/index';
 import { listFolders } from '../../db/folders';
-import type { FolderDTO, TaskRow } from '../types';
+import type { TaskRow } from '../types';
 
 const MAX_SAMPLES_PER_FOLDER = 3;
 const MAX_SAMPLE_CHARS = 120;
@@ -50,13 +50,19 @@ export function buildFolderContext(userId: number): FolderContext {
 export function formatFolderContextForPrompt(ctx: FolderContext): string {
   const lines: string[] = ['Available folders:'];
 
-  for (const folder of ctx.folders) {
-    const label = folder.isSystem ? `${folder.slug} (system)` : folder.slug;
-    lines.push(`- ${label}: "${folder.displayName}"`);
+  const sortedFolders = [...ctx.folders].sort((a, b) => a.slug.localeCompare(b.slug));
+
+  for (const folder of sortedFolders) {
+    const systemLabel = folder.isSystem ? ' (system)' : '';
+    lines.push(`- slug: "${folder.slug}", name: "${folder.displayName}"${systemLabel}`);
 
     if (folder.samples.length > 0) {
-      const examples = folder.samples.map((s) => `  * ${s}`).join('\n');
-      lines.push(examples);
+      for (const sample of folder.samples) {
+        const clean = sample.replace(/\n/g, ' ').trim();
+        if (clean) {
+          lines.push(`  * sample: "${clean}"`);
+        }
+      }
     }
   }
 

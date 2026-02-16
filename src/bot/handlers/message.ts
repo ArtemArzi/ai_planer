@@ -2,9 +2,9 @@ import type { Context } from 'grammy';
 import type { Message } from 'grammy/types';
 import {
   processMessage as captureMessage,
-  splitMultiCapture,
   buildFolderPrefixAliases,
 } from '../../lib/capture';
+import { orchestrateSplit } from '../../lib/ai/splitterOrchestrate';
 import { createTask, findTaskByTelegramMessageId, updateTask } from '../../db/tasks';
 import { getUser, upsertUser } from '../../db/users';
 import { listFolders } from '../../db/folders';
@@ -104,7 +104,21 @@ async function processSingleMessage(
 
     const folderAliases = getUserFolderAliases(userId);
     const timezone = user?.timezone || 'UTC';
-    const items = mediaType ? [text] : splitMultiCapture(text, folderAliases);
+    const explicitFolderForAllItems = mediaType
+      ? null
+      : (() => {
+          const probe = captureMessage(text, { folderAliases, timezone });
+          return probe.hasExplicitTag ? probe.folder : null;
+        })();
+
+    let items: string[];
+
+    if (mediaType) {
+      items = [text];
+    } else {
+      const splitResult = await orchestrateSplit(text, folderAliases);
+      items = splitResult.items;
+    }
 
     if (!mediaType && items.length === 0) {
       await ctx.reply('❌ Не удалось извлечь задачи. Добавьте текст.');
@@ -115,7 +129,11 @@ async function processSingleMessage(
 
     for (let index = 0; index < items.length; index += 1) {
       const itemText = items[index];
-      const captureResult = captureMessage(itemText, {
+      const textForCapture = explicitFolderForAllItems
+        ? `${explicitFolderForAllItems}: ${itemText}`
+        : itemText;
+
+      const captureResult = captureMessage(textForCapture, {
         hasMedia: !!mediaType,
         mediaType,
         folderAliases,
