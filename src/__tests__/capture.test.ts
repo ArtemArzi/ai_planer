@@ -163,6 +163,39 @@ describe('Capture Precedence: AI Classification', () => {
   });
 });
 
+describe('Capture: Cleanup and Ambiguity', () => {
+  it('medium cleanup: strips colons and dashes after prefix', () => {
+    const cases = [
+      'работа: сделать отчет',
+      'работа - сделать отчет',
+      'работа:- сделать отчет',
+    ];
+
+    for (const input of cases) {
+      const result = processMessage(input);
+      expect(result.folder).toBe('work');
+      expect(result.content).toBe('сделать отчет');
+    }
+  });
+
+  it('mixed-language ambiguity: "work" (EN) and "работа" (RU) both work', () => {
+    expect(processMessage('work task').folder).toBe('work');
+    expect(processMessage('работа задача').folder).toBe('work');
+  });
+
+  it('protected token preservation: does not strip non-prefix words that look similar', () => {
+    const result = processMessage('работаю над проектом');
+    expect(result.hasExplicitTag).toBe(false);
+    expect(result.content).toBe('работаю над проектом');
+  });
+
+  it('empty-after-cleanup edge: only prefix and separators', () => {
+    const result = processMessage('работа: - ');
+    expect(result.folder).toBe('work');
+    expect(result.content).toBe('');
+  });
+});
+
 describe('Capture: Status Assignment', () => {
   const longText = 'a'.repeat(501);
 

@@ -9,7 +9,19 @@ describe('AI classifier prompt', () => {
     expect(prompt).toContain('work');
     expect(prompt).toContain('personal');
     expect(prompt).toContain('ideas');
-    expect(prompt).toContain('Return ONLY JSON');
+    expect(prompt).toContain('Output MUST be valid JSON only');
+  });
+
+  it('includes conservative ambiguity guidance in fallback prompt', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain('ambiguous');
+    expect(prompt).toContain('prefer "personal"');
+  });
+
+  it('includes multilingual guidance in fallback prompt', () => {
+    const prompt = buildSystemPrompt();
+    expect(prompt).toContain('Russian (RU)');
+    expect(prompt).toContain('English (EN)');
   });
 
   it('builds context prompt with allowed slugs list', () => {
@@ -24,6 +36,9 @@ describe('AI classifier prompt', () => {
     expect(prompt).toContain('Allowed folder slugs: work, finance');
     expect(prompt).toContain('Работа');
     expect(prompt).toContain('Финансы');
+    expect(prompt).toContain('ambiguous');
+    expect(prompt).toContain('Russian (RU)');
+    expect(prompt).toContain('Output MUST be valid JSON only');
   });
 });
 

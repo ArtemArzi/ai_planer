@@ -54,6 +54,22 @@ describe('splitMultiCapture', () => {
     ]);
   });
 
+  it('service-prefixed list regression: complex service prefixes and bullets', () => {
+    const input = 'работа: - task one\n- task two';
+    expect(splitMultiCapture(input)).toEqual([
+      'task one',
+      'task two'
+    ]);
+  });
+
+  it('service-prefixed list regression: numbered list with space after colon', () => {
+    const input = 'personal: 1. item A\n2. item B';
+    expect(splitMultiCapture(input)).toEqual([
+      'item A',
+      'item B'
+    ]);
+  });
+
   it('does not treat "работа1" prefix as a valid folder prefix', () => {
     const input = 'работа1. fix bug\n2. review PR';
     expect(splitMultiCapture(input)).toEqual([input]);

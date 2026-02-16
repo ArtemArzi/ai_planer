@@ -376,12 +376,13 @@ describe('formatFolderContextForPrompt', () => {
       ],
     };
     const result = formatFolderContextForPrompt(ctx);
-    expect(result).toContain('work (system)');
-    expect(result).toContain('"Работа"');
+    expect(result).toContain('slug: "work"');
+    expect(result).toContain('name: "Работа"');
+    expect(result).toContain('(system)');
     expect(result).toContain('Fix bug');
     expect(result).toContain('Deploy');
-    expect(result).toContain('gym');
-    expect(result).toContain('"Gym"');
+    expect(result).toContain('slug: "gym"');
+    expect(result).toContain('name: "Gym"');
   });
 
   it('handles empty folders list', () => {
